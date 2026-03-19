@@ -1,13 +1,13 @@
-@* NavMenu.razor — Menu lateral com tema medieval *@
+@* NavMenu.razor — Menu lateral *@
 <nav class="nav-menu">
 
     <div class="sidebar-brand">
-        <div class="sidebar-emblem">⚔</div>
+        <div class="sidebar-emblem">✦</div>
         <h1>RPG Sheet<br />Hub</h1>
         <p class="brand-subtitle">Seu grimório de personagens</p>
     </div>
 
-    <div style="padding: 1.5rem 0 0;">
+    <div style="padding: 1rem 0 0;">
         <p class="nav-section-title">Principal</p>
 
         <div class="nav-item">
@@ -17,43 +17,43 @@
             </NavLink>
         </div>
 
-        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+        <div class="nav-divider"></div>
 
         <p class="nav-section-title">Sistemas</p>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="sistemas">
+            <NavLink class="nav-link" href="sistemas" Match="NavLinkMatch.All">
                 <span class="nav-icon">📜</span>
                 <span>Gerenciar Sistemas</span>
             </NavLink>
         </div>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="sistemas/novo">
+            <NavLink class="nav-link" href="sistemas/novo" Match="NavLinkMatch.All">
                 <span class="nav-icon">✦</span>
                 <span>Novo Sistema</span>
             </NavLink>
         </div>
 
-        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+        <div class="nav-divider"></div>
 
         <p class="nav-section-title">Fichas</p>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="fichas">
+            <NavLink class="nav-link" href="fichas" Match="NavLinkMatch.All">
                 <span class="nav-icon">🛡</span>
                 <span>Minhas Fichas</span>
             </NavLink>
         </div>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="fichas/nova">
+            <NavLink class="nav-link" href="fichas/nova" Match="NavLinkMatch.All">
                 <span class="nav-icon">⚔</span>
                 <span>Nova Ficha</span>
             </NavLink>
         </div>
 
-        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+        <div class="nav-divider"></div>
 
         <p class="nav-section-title">Sistemas Rápidos</p>
 

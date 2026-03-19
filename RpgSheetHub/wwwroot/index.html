@@ -41,6 +41,17 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+    <script>
+        window.rpgTheme = {
+            themeClasses: ['theme-hub', 'theme-dnd', 'theme-gurps', 'theme-t20', 'theme-op', 'theme-pathfinder'],
+            apply: function (cssClass) {
+                var body = document.body;
+                // Remove todas as classes de tema existentes
+                this.themeClasses.forEach(function (c) { body.classList.remove(c); });
+                body.classList.add(cssClass);
+            }
+        };
+    </script>
 </body>
 
 </html>

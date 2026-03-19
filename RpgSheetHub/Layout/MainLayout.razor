@@ -1,4 +1,6 @@
 @inherits LayoutComponentBase
+@inject ThemeService ThemeService
+@implements IDisposable
 
 <div class="page">
     <div class="sidebar">
@@ -7,12 +9,13 @@
 
     <main>
         <div class="top-row">
-            <span style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.12em; color: #7a6d5e; text-transform: uppercase;">
-                Grimório v1.0
-            </span>
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" style="margin-left: 1.5rem;">
-                Documentação
-            </a>
+            @if (ThemeService.CurrentTheme != RpgTheme.Hub)
+            {
+                <span class="system-badge-active">
+                    ● @GetSystemName(ThemeService.CurrentTheme)
+                </span>
+            }
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">Docs</a>
         </div>
 
         <article class="content px-4">
@@ -20,3 +23,25 @@
         </article>
     </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        ThemeService.OnThemeChanged += StateHasChanged;
+    }
+
+    private static string GetSystemName(RpgTheme theme) => theme switch
+    {
+        RpgTheme.DnD => "D&D",
+        RpgTheme.Gurps => "GURPS",
+        RpgTheme.T20 => "Tormenta 20",
+        RpgTheme.OrdemParanormal => "Ordem Paranormal",
+        RpgTheme.Pathfinder => "Pathfinder",
+        _ => ""
+    };
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= StateHasChanged;
+    }
+}
