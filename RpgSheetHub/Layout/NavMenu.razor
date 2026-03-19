@@ -1,0 +1,103 @@
+@* NavMenu.razor — Menu lateral com tema medieval *@
+<nav class="nav-menu">
+
+    <div class="sidebar-brand">
+        <div class="sidebar-emblem">⚔</div>
+        <h1>RPG Sheet<br />Hub</h1>
+        <p class="brand-subtitle">Seu grimório de personagens</p>
+    </div>
+
+    <div style="padding: 1.5rem 0 0;">
+        <p class="nav-section-title">Principal</p>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="nav-icon">🏠</span>
+                <span>Início</span>
+            </NavLink>
+        </div>
+
+        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+
+        <p class="nav-section-title">Sistemas</p>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="sistemas">
+                <span class="nav-icon">📜</span>
+                <span>Gerenciar Sistemas</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="sistemas/novo">
+                <span class="nav-icon">✦</span>
+                <span>Novo Sistema</span>
+            </NavLink>
+        </div>
+
+        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+
+        <p class="nav-section-title">Fichas</p>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas">
+                <span class="nav-icon">🛡</span>
+                <span>Minhas Fichas</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas/nova">
+                <span class="nav-icon">⚔</span>
+                <span>Nova Ficha</span>
+            </NavLink>
+        </div>
+
+        <div class="divider-rpg-dark" style="margin: 0.75rem 1.25rem;"></div>
+
+        <p class="nav-section-title">Sistemas Rápidos</p>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=dnd55">
+                <span class="nav-icon">🐉</span>
+                <span>D&amp;D 5.5e</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=dnd35">
+                <span class="nav-icon">🗡</span>
+                <span>D&amp;D 3.5e</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=gurps">
+                <span class="nav-icon">⚙</span>
+                <span>GURPS</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=t20">
+                <span class="nav-icon">🌿</span>
+                <span>Tormenta 20</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=op">
+                <span class="nav-icon">🔮</span>
+                <span>Ordem Paranormal</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="fichas?sistema=pathfinder">
+                <span class="nav-icon">🗺</span>
+                <span>Pathfinder</span>
+            </NavLink>
+        </div>
+    </div>
+
+</nav>

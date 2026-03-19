@@ -1,0 +1,78 @@
+﻿@* Home.razor — Página inicial com tema medieval *@
+@page "/"
+
+<PageTitle>RPG Sheet Hub — Grimório Universal</PageTitle>
+
+<div class="page-header">
+    <h1 class="page-title">Bem-vindo, Aventureiro</h1>
+    <div class="title-ornament">
+        <div class="title-ornament-diamond"></div>
+    </div>
+    <p class="page-subtitle">
+        Seu grimório universal de personagens — D&amp;D, GURPS, Ordem Paranormal e muito mais.
+    </p>
+</div>
+
+<div class="grid-2" style="margin-bottom: 2.5rem;">
+    <div class="card-dark">
+        <div style="font-size: 2rem; margin-bottom: 0.75rem;">📜</div>
+        <p class="card-title">Sistemas de RPG</p>
+        <p style="font-family: 'Crimson Text', serif; color: #c8b89a; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Crie e gerencie os moldes de regras para seus sistemas favoritos.
+            Defina campos, atributos e categorias de forma flexível.
+        </p>
+        <a href="/sistemas" class="btn-rpg btn-rpg-primary">⚙ Gerenciar Sistemas</a>
+    </div>
+    <div class="card-dark">
+        <div style="font-size: 2rem; margin-bottom: 0.75rem;">🛡</div>
+        <p class="card-title">Fichas de Personagem</p>
+        <p style="font-family: 'Crimson Text', serif; color: #c8b89a; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Crie e armazene fichas de personagens para qualquer sistema.
+            Acesse rapidamente seus heróis, vilões e aliados.
+        </p>
+        <a href="/fichas" class="btn-rpg btn-rpg-primary">⚔ Minhas Fichas</a>
+    </div>
+</div>
+
+<div class="card-rpg" style="margin-bottom: 2rem;">
+    <p class="card-title">Sistemas Disponíveis</p>
+    <div class="card-body">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+            <span class="badge-system badge-dnd">D&amp;D 5.5e</span>
+            <span class="badge-system badge-dnd">D&amp;D 3.5e</span>
+            <span class="badge-system badge-gurps">GURPS</span>
+            <span class="badge-system badge-t20">Tormenta 20</span>
+            <span class="badge-system badge-op">Ordem Paranormal</span>
+            <span class="badge-system badge-pf">Pathfinder</span>
+        </div>
+        <p style="margin-top: 1rem; font-style: italic; color: #6b4c28; font-size: 0.9rem;">
+            Não encontrou seu sistema? Crie um template personalizado em
+            <a href="/sistemas/novo" style="color: #9a7c2a;">Novo Sistema</a>.
+        </p>
+    </div>
+</div>
+
+<div class="divider-rpg">
+    <span style="font-family: 'Cinzel', serif; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #9a7c2a; white-space: nowrap; padding: 0 0.5rem;">
+        Ações Rápidas
+    </span>
+</div>
+
+<div class="grid-4">
+    <a href="/fichas/nova?sistema=dnd55" class="card-dark" style="text-decoration: none; display: block;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🐉</div>
+        <p style="font-family: 'Cinzel', serif; font-size: 0.78rem; color: #c9a84c; font-weight: 600; letter-spacing: 0.05em; margin: 0;">Nova Ficha D&amp;D 5.5e</p>
+    </a>
+    <a href="/fichas/nova?sistema=gurps" class="card-dark" style="text-decoration: none; display: block;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚙</div>
+        <p style="font-family: 'Cinzel', serif; font-size: 0.78rem; color: #c9a84c; font-weight: 600; letter-spacing: 0.05em; margin: 0;">Nova Ficha GURPS</p>
+    </a>
+    <a href="/fichas/nova?sistema=op" class="card-dark" style="text-decoration: none; display: block;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🔮</div>
+        <p style="font-family: 'Cinzel', serif; font-size: 0.78rem; color: #c9a84c; font-weight: 600; letter-spacing: 0.05em; margin: 0;">Nova Ficha O. Paranormal</p>
+    </a>
+    <a href="/fichas/nova" class="card-dark" style="text-decoration: none; display: block; border-color: rgba(154,124,42,0.5);">
+        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">✦</div>
+        <p style="font-family: 'Cinzel', serif; font-size: 0.78rem; color: #c9a84c; font-weight: 600; letter-spacing: 0.05em; margin: 0;">Escolher Sistema...</p>
+    </a>
+</div>

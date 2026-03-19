@@ -1,0 +1,22 @@
+@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row">
+            <span style="font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.12em; color: #7a6d5e; text-transform: uppercase;">
+                Grimório v1.0
+            </span>
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" style="margin-left: 1.5rem;">
+                Documentação
+            </a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

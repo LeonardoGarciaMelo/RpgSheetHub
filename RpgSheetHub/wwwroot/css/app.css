@@ -1,0 +1,102 @@
+/* app.css — Neutraliza o Bootstrap e aplica o tema RPG */
+
+/* Remove estilos padrão do Blazor que conflitam */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+}
+
+/* Blazor loading screen */
+.loading-progress {
+    position: relative;
+    display: block;
+    fill: none;
+    stroke: #1a0e05;
+    stroke-width: 0.08rem;
+    margin: 20vh auto 1rem;
+    width: 8rem;
+    height: 8rem;
+}
+
+.loading-progress circle:last-child {
+    stroke: #c9a84c;
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+
+.loading-progress-text {
+    position: absolute;
+    text-align: center;
+    font-weight: bold;
+    inset: calc(20vh + 3.25rem) 0 auto;
+    font-family: 'Cinzel', Georgia, serif;
+    color: #c9a84c;
+}
+
+.loading-progress-text:after {
+    content: var(--blazor-load-percentage-text, "Carregando o grimório...");
+}
+
+/* Blazor error UI */
+#blazor-error-ui {
+    background: #1a0e05;
+    border: 1px solid #7a1515;
+    border-radius: 4px;
+    color: #f4ead5;
+    font-family: 'Crimson Text', Georgia, serif;
+    display: none;
+    font-size: 0.9rem;
+    overflow: hidden;
+    padding: 0.6rem 1.25rem;
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1000;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+    color: #c9a84c;
+}
+
+/* Neutralizar reset do Bootstrap que quebra o layout */
+.page {
+    display: flex !important;
+    min-height: 100vh !important;
+}
+
+/* Garante que o Bootstrap não sobrescreva as cores do body */
+body {
+    background-color: #2a2520 !important;
+}
+
+/* Remove o padding-left que o Bootstrap coloca no sidebar padrão do Blazor */
+.sidebar {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Garante que links dentro do nav não herdem cor azul do Bootstrap */
+.sidebar a,
+.sidebar a:visited,
+.sidebar a:hover {
+    text-decoration: none !important;
+}
+
+/* Remove outline padrão do Bootstrap nos botões RPG */
+.btn-rpg:focus,
+.btn-rpg:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Garante que o conteúdo principal expanda corretamente */
+main {
+    flex: 1 !important;
+    min-width: 0;
+}
