@@ -1,0 +1,174 @@
+﻿@page "/fichas/nova"
+@using System.Text.Json
+@inject NavigationManager NavManager
+@inject ThemeService Theme
+@inject TemplateService Templates
+@inject IJSRuntime JS
+
+<PageTitle>Nova Ficha - RPG Hub</PageTitle>
+
+@if (CurrentTemplate == null)
+{
+    <div class="page-header">
+        <h1 class="page-title">Nova Ficha</h1>
+        <p class="page-subtitle">Escolha o sistema para conjurar seu personagem.</p>
+    </div>
+    
+    <div class="grid-3">
+        @foreach (var template in Templates.GetAll())
+        {
+            <div class="card-dark" style="cursor: pointer;" @onclick="() => SelectSystem(template.Name)">
+                <p class="card-title">@template.Name</p>
+                <button class="btn-rpg btn-rpg-primary w-100">Criar neste sistema</button>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="page-title">Nova Ficha: @CurrentTemplate.Name</h1>
+            <div class="title-ornament"><div class="title-ornament-diamond"></div></div>
+        </div>
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn-rpg btn-rpg-ghost" @onclick="GoBack">Cancelar</button>
+            <button class="btn-rpg btn-rpg-primary" @onclick="SaveSheet">💾 Salvar Ficha</button>
+        </div>
+    </div>
+
+    @if (SystemSlug == "dnd55")
+    {
+        <DnD55Layout Sheet="NewSheetData" />
+    }
+    else
+    {
+        <div class="card-hub">
+            <div class="grid-2" style="margin-bottom: 2rem;">
+                <div class="form-group">
+                    <label class="label-rpg">Nome do Personagem</label>
+                    <input type="text" class="input-rpg" @bind="NewSheetData.CharacterName" />
+                </div>
+                <div class="form-group">
+                    <label class="label-rpg">Nome do Jogador</label>
+                    <input type="text" class="input-rpg" @bind="NewSheetData.PlayerName" />
+                </div>
+            </div>
+
+            <div class="divider-rpg divider-rpg-accent"></div>
+
+            @foreach (var category in CurrentTemplate.Fields.GroupBy(f => f.Category))
+            {
+                <h3 style="font-family: var(--font-display); color: var(--c-accent-bright); margin: 1.5rem 0 1rem; font-size: 1.2rem;">
+                    @category.Key
+                </h3>
+
+                <div class="grid-3">
+                    @foreach (var field in category)
+                    {
+                        <div class="form-group">
+                            <label class="label-rpg">@field.Label</label>
+                            <input type="@field.InputType"
+                                   class="input-rpg"
+                                   value="@NewSheetData.Attributes.GetValueOrDefault(field.Key)"
+                                   @onchange="@(e => NewSheetData.Attributes[field.Key] = e.Value?.ToString() ?? string.Empty)" />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@code {
+    /// <summary>
+    /// Parameter captured directly from the URL via QueryString (e.g., ?sistema=dnd55).
+    /// </summary>
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "sistema")]
+    public string? SystemSlug { get; set; }
+
+    /// <summary>
+    /// The system rules template currently selected by the user.
+    /// </summary>
+    private SystemTemplate? CurrentTemplate;
+
+    /// <summary>
+    /// Object that stores the data filled by the user before saving.
+    /// </summary>
+    private CharacterSheet NewSheetData = new();
+
+    /// <summary>
+    /// Method executed whenever the component parameters (like the URL QueryString) change.
+    /// </summary>
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(SystemSlug))
+        {
+            CurrentTemplate = Templates.GetBySlug(SystemSlug);
+            
+            if (CurrentTemplate != null)
+            {
+                await InitializeSheet(CurrentTemplate);
+                await Theme.SetThemeBySlugAsync(SystemSlug);
+            }
+        }
+        else
+        {
+            CurrentTemplate = null;
+            await Theme.ResetThemeAsync();
+        }
+    }
+
+    /// <summary>
+    /// Updates the URL and reloads the page state when clicking one of the system cards.
+    /// </summary>
+    private void SelectSystem(string systemName)
+    {
+        string slug = systemName.Contains("D&D") ? "dnd55" : "op";
+        NavManager.NavigateTo($"/fichas/nova?sistema={slug}");
+    }
+
+    /// <summary>
+    /// Prepares the CharacterSheet object based on the chosen template.
+    /// </summary>
+    private Task InitializeSheet(SystemTemplate template)
+    {
+        NewSheetData = new CharacterSheet { SystemTemplateId = template.Id };
+
+        // Garante que todas as chaves existam para evitar erros de NullReference
+        foreach (var field in template.Fields)
+        {
+            NewSheetData.Attributes[field.Key] = string.Empty;
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Returns the user to the home page (Hub).
+    /// </summary>
+    private void GoBack()
+    {
+        NavManager.NavigateTo("/");
+    }
+
+    /// <summary>
+    /// Captures the current form data and saves it to the browser's LocalStorage.
+    /// </summary>
+    private async Task SaveSheet()
+    {
+        var existingDataJson = await JS.InvokeAsync<string>("localStorage.getItem", "rpg_sheets");
+        var sheets = string.IsNullOrEmpty(existingDataJson)
+            ? new List<CharacterSheet>()
+            : JsonSerializer.Deserialize<List<CharacterSheet>>(existingDataJson) ?? new List<CharacterSheet>();
+
+        sheets.Add(NewSheetData);
+
+        var newJson = JsonSerializer.Serialize(sheets);
+        await JS.InvokeVoidAsync("localStorage.setItem", "rpg_sheets", newJson);
+
+        await JS.InvokeVoidAsync("alert", $"O grimório gravou o nome de {NewSheetData.CharacterName}!");
+        NavManager.NavigateTo("/fichas");
+    }
+}

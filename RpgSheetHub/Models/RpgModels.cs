@@ -1,86 +1,89 @@
-﻿namespace RpgSheetHub.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace RpgSheetHub.Models
 {
     /// <summary>
-    /// Representa o molde de um sistema de RPG (ex: D&D 5.5e, GURPS, Ordem Paranormal).
-    /// Define as regras e quais campos as fichas baseadas neste sistema deverão conter.
+    /// Represents the template of an RPG system (e.g., D&D 5.5e, GURPS, Ordem Paranormal).
+    /// Defines the rules and which fields the sheets based on this system must contain.
     /// </summary>
     public class SystemTemplate
     {
         /// <summary>
-        /// Identificador único do molde do sistema.
+        /// Unique identifier for the system template.
         /// </summary>
         public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
-        /// Nome do sistema de RPG (ex: "Dungeons & Dragons 5.5e").
+        /// Name of the RPG system (e.g., "Dungeons & Dragons 5.5e").
         /// </summary>
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Lista contendo todas as definições de campos exigidas por este sistema.
+        /// List containing all field definitions required by this system.
         /// </summary>
         public List<FieldDefinition> Fields { get; set; } = new();
     }
 
     /// <summary>
-    /// Define a estrutura de um campo individual dentro de uma ficha de RPG.
-    /// Funciona como a "planta baixa" para gerar as caixas de texto e números na tela.
+    /// Defines the structure of an individual field within an RPG sheet.
+    /// Acts as the blueprint for generating text boxes and numbers on the screen.
     /// </summary>
     public class FieldDefinition
     {
         /// <summary>
-        /// Chave de identificação única do campo no dicionário de dados (ex: "forca", "pv_max").
-        /// Não deve conter espaços ou caracteres especiais.
+        /// Unique identification key for the field in the data dictionary (e.g., "strength", "max_hp").
+        /// Must not contain spaces or special characters.
         /// </summary>
         public string Key { get; set; } = string.Empty;
 
         /// <summary>
-        /// O nome amigável do campo que será exibido para o usuário na tela (ex: "Força", "Pontos de Vida").
+        /// The user-friendly name of the field displayed on the screen (e.g., "Strength", "Hit Points").
         /// </summary>
         public string Label { get; set; } = string.Empty;
 
         /// <summary>
-        /// Define o tipo de dado e como ele será renderizado em HTML.
-        /// Valores comuns: "text", "number", "textarea", "checkbox".
+        /// Defines the data type and how it will be rendered in HTML.
+        /// Common values: "text", "number", "textarea", "checkbox".
         /// </summary>
         public string InputType { get; set; } = "text";
 
         /// <summary>
-        /// Categoria ou aba para agrupar visualmente o campo na ficha (ex: "Atributos Principais", "Inventário").
+        /// Category or tab to visually group the field on the sheet (e.g., "Main Attributes", "Inventory").
         /// </summary>
         public string Category { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Representa a ficha de um personagem preenchida por um jogador.
-    /// Armazena os dados dinamicamente com base no molde (<see cref="SystemTemplate"/>) escolhido.
+    /// Represents a character sheet filled out by a player.
+    /// Stores data dynamically based on the chosen <see cref="SystemTemplate"/>.
     /// </summary>
     public class CharacterSheet
     {
         /// <summary>
-        /// Identificador único da ficha do personagem.
+        /// Unique identifier for the character sheet.
         /// </summary>
         public Guid Id { get; set; } = Guid.NewGuid();
 
         /// <summary>
-        /// Nome do personagem.
+        /// Character's name.
         /// </summary>
         public string CharacterName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Nome do jogador dono da ficha.
+        /// Name of the player who owns the sheet.
         /// </summary>
         public string PlayerName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Referência ao ID do <see cref="SystemTemplate"/> que dita as regras desta ficha.
+        /// Reference to the <see cref="SystemTemplate"/> ID that dictates the rules of this sheet.
         /// </summary>
         public Guid SystemTemplateId { get; set; }
 
         /// <summary>
-        /// Dicionário flexível que armazena os valores reais preenchidos pelo jogador.
-        /// A chave (string) corresponde à propriedade 'Key' da 'FieldDefinition'.
-        /// O valor (object) armazena o que foi digitado (texto, número, booleano, etc).
+        /// Flexible dictionary that stores the actual values entered by the player.
+        /// The key (string) corresponds to the 'Key' property of 'FieldDefinition'.
+        /// The value (object) stores what was typed (text, number, boolean, etc.).
         /// </summary>
         public Dictionary<string, object> Attributes { get; set; } = new();
     }

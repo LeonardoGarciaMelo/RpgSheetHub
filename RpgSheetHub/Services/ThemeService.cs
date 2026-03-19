@@ -3,21 +3,21 @@
 namespace RpgSheetHub.Services
 {
     /// <summary>
-    /// Define os temas visuais disponíveis por sistema de RPG.
+    /// Defines the available visual themes per RPG system.
     /// </summary>
     public enum RpgTheme
     {
-        Hub,        // Neutro — página principal
-        DnD,        // Dourado, pergaminho
-        Gurps,      // Metálico, cinza aço (futuro)
-        T20,        // Verde floresta (futuro)
-        OrdemParanormal, // Roxo, sombrio (futuro)
-        Pathfinder  // Laranja/bronze (futuro)
+        Hub,             // Neutral — main page
+        DnD,             // Golden, parchment
+        Gurps,           // Metallic, steel gray (future)
+        T20,             // Forest green (future)
+        OrdemParanormal, // Purple, dark (future)
+        Pathfinder       // Orange/bronze (future)
     }
 
     /// <summary>
-    /// Gerencia o tema ativo do site. Aplica uma classe CSS no <body>
-    /// que ativa as variáveis de cor do sistema correspondente.
+    /// Manages the active site theme. Applies a CSS class to the <body>
+    /// that triggers the corresponding system's color variables.
     /// </summary>
     public class ThemeService
     {
@@ -26,8 +26,8 @@ namespace RpgSheetHub.Services
         public RpgTheme CurrentTheme { get; private set; } = RpgTheme.Hub;
 
         /// <summary>
-        /// Disparado sempre que o tema muda — componentes podem se inscrever
-        /// para re-renderizar quando necessário.
+        /// Triggered whenever the theme changes — components can subscribe
+        /// to re-render when necessary.
         /// </summary>
         public event Action? OnThemeChanged;
 
@@ -37,7 +37,7 @@ namespace RpgSheetHub.Services
         }
 
         /// <summary>
-        /// Retorna a classe CSS correspondente ao tema.
+        /// Returns the CSS class corresponding to the theme.
         /// </summary>
         public static string GetThemeClass(RpgTheme theme) => theme switch
         {
@@ -50,7 +50,7 @@ namespace RpgSheetHub.Services
         };
 
         /// <summary>
-        /// Retorna o tema correspondente a um slug de sistema (ex: "dnd55", "gurps").
+        /// Returns the theme corresponding to a system slug (e.g., "dnd55", "gurps").
         /// </summary>
         public static RpgTheme FromSystemSlug(string? slug) => slug?.ToLower() switch
         {
@@ -63,7 +63,7 @@ namespace RpgSheetHub.Services
         };
 
         /// <summary>
-        /// Aplica um tema, atualiza a classe do body via JS e notifica os componentes.
+        /// Applies a theme, updates the body class via JS, and notifies components.
         /// </summary>
         public async Task SetThemeAsync(RpgTheme theme)
         {
@@ -72,20 +72,20 @@ namespace RpgSheetHub.Services
             CurrentTheme = theme;
             var cssClass = GetThemeClass(theme);
 
-            // Remove todas as classes de tema e aplica a nova
+            // Removes all theme classes and applies the new one
             await _js.InvokeVoidAsync("rpgTheme.apply", cssClass);
 
             OnThemeChanged?.Invoke();
         }
 
         /// <summary>
-        /// Atalho para aplicar pelo slug do sistema.
+        /// Shortcut to apply the theme via the system slug.
         /// </summary>
         public Task SetThemeBySlugAsync(string? slug)
             => SetThemeAsync(FromSystemSlug(slug));
 
         /// <summary>
-        /// Volta ao tema neutro do hub.
+        /// Resets to the neutral hub theme.
         /// </summary>
         public Task ResetThemeAsync()
             => SetThemeAsync(RpgTheme.Hub);

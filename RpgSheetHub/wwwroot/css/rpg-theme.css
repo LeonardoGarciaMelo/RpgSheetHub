@@ -2,56 +2,49 @@
    RPG SHEET HUB — Sistema de Temas por Sistema
    ============================================================ */
 
-/* ── Fontes (carregadas via index.html) ────────────────────── */
+/* Fontes  */
 /* Cinzel — títulos elegantes universais                        */
 /* Crimson Text — corpo legível e clássico                      */
 /* Share Tech Mono — usado no tema GURPS/sci-fi futuro          */
 
-/* ============================================================
-   TEMA BASE — Hub Neutro
-   Escuro, elegante, sem referência de época específica
-   ============================================================ */
+/* TEMA BASE — Hub Neutro*/
 :root {
-    /* Cores base do hub */
     --c-bg: #0e0e12;
     --c-bg-2: #16161d;
     --c-bg-3: #1e1e28;
     --c-surface: #22222e;
     --c-border: rgba(255,255,255,0.08);
     --c-border-accent: rgba(255,255,255,0.18);
-    /* Texto */
+
     --c-text: #e8e6e0;
     --c-text-2: #9e9b94;
     --c-text-3: #5e5c58;
-    /* Accent neutro (prata/índigo suave) */
+
     --c-accent: #7b7ce8;
     --c-accent-bright: #a0a1f0;
     --c-accent-dim: rgba(123,124,232,0.15);
-    /* Semânticos */
+
     --c-danger: #c0392b;
     --c-success: #27ae60;
-    /* Tipografia */
+
     --font-display: 'Cinzel', Georgia, serif;
     --font-body: 'Crimson Text', Georgia, serif;
     --font-mono: 'Share Tech Mono', monospace;
-    /* Geometria */
+
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
-    /* Sombras */
+
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
     --shadow-md: 0 4px 20px rgba(0,0,0,0.5);
     --shadow-lg: 0 8px 40px rgba(0,0,0,0.6);
-    /* Sidebar */
+
     --sidebar-bg: #0a0a0f;
     --sidebar-border: rgba(255,255,255,0.07);
     --sidebar-width: 240px;
 }
 
-/* ============================================================
-   TEMA D&D — Dourado, Pergaminho, Medieval
-   Aplicado via classe .theme-dnd no <body> ou elemento raiz
-   ============================================================ */
+/* TEMA D&D — Dourado, Medieval */
 .theme-dnd {
     --c-bg: #0f0b05;
     --c-bg-2: #1a1208;
@@ -75,62 +68,7 @@
         background-image: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,0,0,0.03) 40px, rgba(0,0,0,0.03) 41px), repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px), linear-gradient(160deg, #1a1208 0%, #0f0904 60%, #090604 100%) !important;
     }
 
-/* ============================================================
-   TEMA ORDEM PARANORMAL — Roxo, Horror, Sombrio
-   (placeholder — descomentar quando for implementar)
-   ============================================================ */
-/*
-.theme-op {
-    --c-bg:           #080810;
-    --c-bg-2:         #0f0f1a;
-    --c-bg-3:         #161625;
-    --c-surface:      #1a1a2e;
-    --c-border:       rgba(120,80,200,0.2);
-    --c-border-accent:#6a3fa0;
-
-    --c-text:         #d8d0f0;
-    --c-text-2:       #8070b0;
-    --c-text-3:       #50406a;
-
-    --c-accent:       #7040c0;
-    --c-accent-bright:#a060e8;
-    --c-accent-dim:   rgba(112,64,192,0.15);
-
-    --sidebar-bg:     linear-gradient(180deg, #0a0818 0%, #060610 100%);
-    --sidebar-border: #6a3fa0;
-}
-*/
-
-/* ============================================================
-   TEMA GURPS — Metálico, Cinza Aço, Técnico
-   (placeholder — descomentar quando for implementar)
-   ============================================================ */
-/*
-.theme-gurps {
-    --c-bg:           #0c0e10;
-    --c-bg-2:         #141618;
-    --c-bg-3:         #1c1e22;
-    --c-surface:      #22252a;
-    --c-border:       rgba(100,140,180,0.2);
-    --c-border-accent:#4a7fa0;
-
-    --c-text:         #c8d8e8;
-    --c-text-2:       #6888a0;
-    --c-text-3:       #405060;
-
-    --c-accent:       #4a8fb8;
-    --c-accent-bright:#70b8e0;
-    --c-accent-dim:   rgba(74,143,184,0.15);
-
-    --sidebar-bg:     linear-gradient(180deg, #0e1014 0%, #080a0c 100%);
-    --sidebar-border: #4a7fa0;
-    --font-display:   'Share Tech Mono', monospace;
-}
-*/
-
-/* ============================================================
-   RESET E BASE
-   ============================================================ */
+/* TEMA ORDEM PARANORMAL*/
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -151,15 +89,13 @@ body {
     background-image: radial-gradient(ellipse at 20% 0%, rgba(123,124,232,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(123,124,232,0.03) 0%, transparent 60%);
 }
 
-/* ============================================================
-   LAYOUT
-   ============================================================ */
+/*  LAYOUT */
 .page {
     display: flex;
     min-height: 100vh;
 }
 
-/* ── Sidebar ───────────────────────────────────────────────── */
+/* Sidebar  */
 .sidebar {
     width: var(--sidebar-width);
     min-height: 100vh;
@@ -527,7 +463,6 @@ article.content {
         background: var(--c-accent-dim);
     }
 
-/* ── Inputs ────────────────────────────────────────────────── */
 .input-rpg {
     display: block;
     width: 100%;
