@@ -1,0 +1,38 @@
+@* ============================================================
+   SheetNotes.razor — Caixas de texto livre reutilizáveis
+   
+   Uso:
+   <SheetNotes Sheet="@Sheet" Sections="@sections" />
+   ============================================================ *@
+@using RpgSheetHub.Models
+
+@foreach (var nota in Sections)
+{
+    <div class="dnd-section-box dnd-grow" style="@(nota.FullWidth ? "grid-column: 1 / -1;" : "")">
+        <label class="dnd-section-label">@nota.Label</label>
+        <textarea class="dnd-textarea-grow"
+                  value="@V(nota.Key)"
+                  @oninput='e=>S(nota.Key, e.Value)'
+                  placeholder="@nota.Placeholder"
+                  style="min-height: @(nota.MinHeight)px"></textarea>
+    </div>
+}
+
+@code {
+    [Parameter] public CharacterSheet    Sheet    { get; set; } = new();
+    [Parameter] public List<NoteSection> Sections { get; set; } = new();
+
+    private string V(string k) =>
+        Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+
+    private void S(string k, object? v) =>
+        Sheet.Attributes[k] = v ?? "";
+
+    public record NoteSection(
+        string Key,
+        string Label,
+        string Placeholder = "",
+        int    MinHeight   = 70,
+        bool   FullWidth   = false
+    );
+}

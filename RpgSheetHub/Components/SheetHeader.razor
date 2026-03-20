@@ -1,0 +1,62 @@
+@* ============================================================
+   SheetHeader.razor — Componente compartilhado entre sistemas
+   
+   Uso:
+   <SheetHeader Sheet="@Sheet" ExtraFields="@extraFields" />
+   
+   ExtraFields permite que cada sistema adicione campos extras
+   no cabeçalho além dos padrões (nome, nível, XP, jogador).
+   ============================================================ *@
+@using RpgSheetHub.Models
+
+<div class="dnd-header" style="grid-template-columns: @GridColumns">
+    <div class="dnd-field" style="grid-column: span 2;">
+        <input type="text" @bind="Sheet.CharacterName" placeholder=" " />
+        <label>Nome do Personagem</label>
+    </div>
+    <div class="dnd-field">
+        <input type="text" value="@V("jogador")" @onchange='e=>S("jogador",e.Value)' placeholder=" " />
+        <label>Jogador</label>
+    </div>
+    <div class="dnd-field dnd-field-sm">
+        <input type="number" value="@V("nivel")" @onchange='e=>S("nivel",e.Value)' placeholder=" " />
+        <label>Nível</label>
+    </div>
+    <div class="dnd-field dnd-field-sm">
+        <input type="number" value="@V("xp")" @onchange='e=>S("xp",e.Value)' placeholder=" " />
+        <label>XP</label>
+    </div>
+
+    @* Campos extras definidos pelo sistema (classe, espécie, NEX, origem, etc.) *@
+    @foreach (var field in ExtraFields)
+    {
+        <div class="dnd-field @(field.Small ? "dnd-field-sm" : "")">
+            <input type="@field.InputType"
+                   value="@V(field.Key)"
+                   @onchange='e=>S(field.Key, e.Value)'
+                   placeholder=" " />
+            <label>@field.Label</label>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public CharacterSheet Sheet        { get; set; } = new();
+    [Parameter] public List<HeaderField> ExtraFields { get; set; } = new();
+
+    // Calcula as colunas do grid dinamicamente
+    private string GridColumns =>
+        $"2fr 1fr 1fr 80px 80px{string.Concat(Enumerable.Repeat(" 1fr", ExtraFields.Count(f => !f.Small)))}";
+
+    private string V(string k) =>
+        Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+
+    private void S(string k, object? v) =>
+        Sheet.Attributes[k] = v ?? "";
+
+    /// <summary>
+    /// Define um campo extra no cabeçalho.
+    /// Cada sistema instancia os que precisa.
+    /// </summary>
+    public record HeaderField(string Key, string Label, string InputType = "text", bool Small = false);
+}

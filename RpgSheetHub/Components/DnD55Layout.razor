@@ -1,6 +1,6 @@
-﻿@using RpgSheetHub.Models
+@using RpgSheetHub.Models
 
-@* ── Abas de navegação da ficha ─────────────────────────────── *@
+@* ── Abas de navegação ───────────────────────────────────────── *@
 <div class="sheet-tabs">
     @foreach (var tab in Tabs)
     {
@@ -50,13 +50,10 @@
         </div>
     </div>
 
-    @* Corpo principal: 3 colunas *@
     <div class="dnd-body">
 
-        @* ── Coluna Esquerda: Atributos + Salvaguardas + Perícias ── *@
+        @* ── Coluna Esquerda: Atributos + Salvaguardas ── *@
         <div class="dnd-col-left">
-
-            @* Bônus de Proficiência e Inspiração *@
             <div class="dnd-row-2">
                 <div class="dnd-stat-box">
                     <input type="number" value="@V("prof_bonus")" @onchange='e=>S("prof_bonus",e.Value)' />
@@ -68,7 +65,6 @@
                 </div>
             </div>
 
-            @* Atributos *@
             @foreach (var a in Attrs)
             {
                 var score = I(a.Key);
@@ -77,12 +73,10 @@
                     <div class="dnd-attr-name">@a.Label</div>
                     <div class="dnd-attr-inner">
                         <input type="number" class="dnd-attr-score"
-                               value="@score"
-                               @onchange='e=>S(a.Key, e.Value)'
+                               value="@score" @onchange='e=>S(a.Key, e.Value)'
                                min="1" max="30" />
                         <div class="dnd-attr-mod">@FMod(mod)</div>
                     </div>
-                    @* Salvaguarda inline *@
                     <div class="dnd-save-inline">
                         <span class="dnd-circle @(Bool($"save_{a.Key}") ? "filled" : "")"
                               @onclick='()=>Toggle($"save_{a.Key}")'></span>
@@ -92,18 +86,14 @@
                 </div>
             }
 
-            @* Percepção Passiva *@
             <div class="dnd-passive-box">
                 <span class="dnd-passive-val">@(10 + Mod(I("wisdom")) + (Bool("prof_perception") ? IZero("prof_bonus") : 0))</span>
                 <span class="dnd-passive-lbl">Percepção Passiva</span>
             </div>
-
         </div>
 
         @* ── Coluna Central: Combate + HP + Perícias ── *@
         <div class="dnd-col-center">
-
-            @* Stats de combate *@
             <div class="dnd-combat-row">
                 <div class="dnd-combat-box">
                     <input type="number" value="@V("ca")" @onchange='e=>S("ca",e.Value)' />
@@ -123,7 +113,6 @@
                 </div>
             </div>
 
-            @* Pontos de Vida *@
             <div class="dnd-hp-block">
                 <div class="dnd-hp-row">
                     <div class="dnd-hp-sub">
@@ -142,7 +131,6 @@
                 <label class="dnd-section-label">Pontos de Vida</label>
             </div>
 
-            @* Dados de Vida + Salvaguarda contra morte *@
             <div class="dnd-row-2">
                 <div class="dnd-box-inner">
                     <label class="dnd-section-label">Dados de Vida</label>
@@ -161,16 +149,14 @@
                     <label class="dnd-section-label">Salv. Contra Morte</label>
                     <div class="dnd-death-row">
                         <span style="font-size:0.6rem;color:#6b4c28;">Sucessos</span>
-                        @for (int i = 0; i < 3; i++) {
-                            var idx = i;
+                        @for (int i = 0; i < 3; i++) { var idx = i;
                             <span class="dnd-circle @(Bool($"death_suc_{idx}") ? "filled" : "")"
                                   @onclick='()=>Toggle($"death_suc_{idx}")'></span>
                         }
                     </div>
                     <div class="dnd-death-row">
                         <span style="font-size:0.6rem;color:#6b4c28;">Falhas</span>
-                        @for (int i = 0; i < 3; i++) {
-                            var idx = i;
+                        @for (int i = 0; i < 3; i++) { var idx = i;
                             <span class="dnd-circle danger @(Bool($"death_fail_{idx}") ? "filled" : "")"
                                   @onclick='()=>Toggle($"death_fail_{idx}")'></span>
                         }
@@ -178,7 +164,6 @@
                 </div>
             </div>
 
-            @* Perícias *@
             <div class="dnd-skills-box">
                 <label class="dnd-section-label">Perícias</label>
                 @foreach (var sk in Skills)
@@ -186,10 +171,11 @@
                     var baseAttr = Mod(I(sk.Attr));
                     var prof     = Bool($"prof_{sk.Key}");
                     var expert   = Bool($"expert_{sk.Key}");
-                    var bonus    = baseAttr + (expert ? IZero("prof_bonus")*2 : prof ? IZero("prof_bonus") : 0);
+                    var bonus    = baseAttr + (prof ? IZero("prof_bonus") : 0);
+                    var skKey    = sk.Key;
                     <div class="dnd-skill-row">
-                        <span class="dnd-circle @(expert ? "expert" : prof ? "filled" : "")"
-                              @onclick='()=>CycleProf(sk.Key)'
+                        <span class="dnd-circle @(prof ? "filled" : "")"
+                              @onclick='()=>CycleProf(skKey)'
                               @onclick:stopPropagation></span>
                         <span class="dnd-skill-val">@FMod(bonus)</span>
                         <span class="dnd-skill-name">@sk.Label</span>
@@ -197,65 +183,130 @@
                     </div>
                 }
             </div>
-
         </div>
 
         @* ── Coluna Direita: Armas + Características + Traços ── *@
         <div class="dnd-col-right">
 
-            @* Armas e Truques de Dano *@
+            @* ARMAS — sistema de cards igual às magias *@
             <div class="dnd-section-box">
-                <label class="dnd-section-label">Armas e Truques de Dano</label>
-                <div class="dnd-attacks-header">
-                    <span>Nome</span><span>Bôn. Atq/CD</span><span>Dano &amp; Tipo</span><span>Obs.</span>
+                <div class="weapon-list-title">
+                    <span>Armas</span>
+                    <button class="btn-add-spell" @onclick="AddWeapon">+ Adicionar Arma</button>
                 </div>
-                @for (int i = 0; i < 6; i++) {
+
+                @for (int i = 0; i < Weapons.Count; i++)
+                {
                     var idx = i;
-                    <div class="dnd-attack-row">
-                        <input type="text" value="@V($"atk_{idx}_nome")"  @onchange='e=>S($"atk_{idx}_nome",e.Value)' />
-                        <input type="text" value="@V($"atk_{idx}_bonus")" @onchange='e=>S($"atk_{idx}_bonus",e.Value)' />
-                        <input type="text" value="@V($"atk_{idx}_dano")"  @onchange='e=>S($"atk_{idx}_dano",e.Value)' />
-                        <input type="text" value="@V($"atk_{idx}_obs")"   @onchange='e=>S($"atk_{idx}_obs",e.Value)' />
+                    var wp  = Weapons[idx];
+
+                    <div class="weapon-card @(wp.Expanded ? "is-open" : "")">
+
+                        @* Linha compacta: nome | teste de ataque | dano | botão | deletar *@
+                        <div class="weapon-card-top">
+                            <input class="weapon-input-name" type="text"
+                                   value="@wp.Nome"
+                                   @onchange='e=>wp.Nome=e.Value?.ToString()??""'
+                                   placeholder="Nome da arma" />
+
+                            <input class="weapon-input-sm" type="text"
+                                   value="@wp.TesteAtaque"
+                                   @onchange='e=>wp.TesteAtaque=e.Value?.ToString()??""'
+                                   placeholder="d20+5" />
+
+                            <input class="weapon-input-sm" type="text"
+                                   value="@wp.Dano"
+                                   @onchange='e=>wp.Dano=e.Value?.ToString()??""'
+                                   placeholder="1d8+3" />
+
+                            <button class="spell-expand-btn" @onclick="()=>wp.Expanded=!wp.Expanded">
+                                @(wp.Expanded ? "▲ Recolher" : "▼ Detalhes")
+                            </button>
+
+                            <button class="spell-del-btn" @onclick='()=>Weapons.RemoveAt(idx)'>✕</button>
+                        </div>
+
+                        @* Painel de detalhes *@
+                        @if (wp.Expanded)
+                        {
+                            <div class="weapon-card-body">
+                                <div class="weapon-meta-grid">
+                                    <div class="spell-meta-field">
+                                        <label>Crítico</label>
+                                        <input type="text" value="@wp.Critico"
+                                               @onchange='e=>wp.Critico=e.Value?.ToString()??""'
+                                               placeholder="19-20 / ×2" />
+                                    </div>
+                                    <div class="spell-meta-field">
+                                        <label>Tipo de Dano</label>
+                                        <input type="text" value="@wp.TipoDano"
+                                               @onchange='e=>wp.TipoDano=e.Value?.ToString()??""'
+                                               placeholder="Cortante" />
+                                    </div>
+                                    <div class="spell-meta-field">
+                                        <label>Propriedades</label>
+                                        <input type="text" value="@wp.Propriedades"
+                                               @onchange='e=>wp.Propriedades=e.Value?.ToString()??""'
+                                               placeholder="Versátil, Leve..." />
+                                    </div>
+                                    <div class="spell-meta-field">
+                                        <label>Maestria</label>
+                                        <input type="text" value="@wp.Maestria"
+                                               @onchange='e=>wp.Maestria=e.Value?.ToString()??""'
+                                               placeholder="Drenar, Ágil..." />
+                                    </div>
+                                    <div class="spell-meta-field">
+                                        <label>Alcance</label>
+                                        <input type="text" value="@wp.Alcance"
+                                               @onchange='e=>wp.Alcance=e.Value?.ToString()??""'
+                                               placeholder="1,5m / 18m" />
+                                    </div>
+                                </div>
+                                <div class="spell-desc-block">
+                                    <label class="spell-desc-label">Poder / Observações especiais</label>
+                                    <textarea class="spell-desc-area"
+                                              @bind="wp.Observacoes"
+                                              @bind:event="oninput"
+                                              rows="3"
+                                              placeholder="Poderes especiais, efeitos mágicos, notas..."></textarea>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                @if (Weapons.Count == 0)
+                {
+                    <div class="spell-empty" style="padding:1rem;">
+                        Nenhuma arma. Clique em <strong>+ Adicionar Arma</strong>.
                     </div>
                 }
             </div>
 
-            @* Características de Classe *@
             <div class="dnd-section-box dnd-grow">
                 <label class="dnd-section-label">Características de Classe</label>
-                <textarea class="dnd-textarea-grow"
-                          @bind="CaracteristicasValue"
-                          @bind:event="oninput"
+                <textarea class="dnd-textarea-grow" @bind="CaracteristicasValue" @bind:event="oninput"
                           placeholder="Liste suas características de classe aqui..."></textarea>
             </div>
 
-            @* Traço de Espécie + Talentos *@
             <div class="dnd-row-2">
                 <div class="dnd-section-box dnd-grow">
                     <label class="dnd-section-label">Traço de Espécie</label>
-                    <textarea class="dnd-textarea-grow"
-                              @bind="TracosValue"
-                              @bind:event="oninput"
+                    <textarea class="dnd-textarea-grow" @bind="TracosValue" @bind:event="oninput"
                               placeholder="Traços raciais..."></textarea>
                 </div>
                 <div class="dnd-section-box dnd-grow">
                     <label class="dnd-section-label">Talentos</label>
-                    <textarea class="dnd-textarea-grow"
-                              @bind="TalentosValue"
-                              @bind:event="oninput"
+                    <textarea class="dnd-textarea-grow" @bind="TalentosValue" @bind:event="oninput"
                               placeholder="Feats e talentos..."></textarea>
                 </div>
             </div>
 
-            @* Treinamento e Proficiência *@
             <div class="dnd-section-box">
                 <label class="dnd-section-label">Treinamento e Proficiência em Equipamentos</label>
-                <textarea class="dnd-textarea-sm"
-                          @bind="TreinamentoValue"
-                          @bind:event="oninput"
+                <textarea class="dnd-textarea-sm" @bind="TreinamentoValue" @bind:event="oninput"
                           placeholder="Armaduras, armas, ferramentas..."></textarea>
             </div>
-
         </div>
     </div>
 </div>
@@ -268,7 +319,6 @@
 {
 <div class="dnd-sheet">
 
-    @* ── Cabeçalho de conjuração ─────────────────────────── *@
     <div class="spell-header-box">
         <div class="dnd-field">
             <input type="text" value="@V("conj_atributo")" @onchange='e=>S("conj_atributo",e.Value)' placeholder="Carisma" />
@@ -288,29 +338,24 @@
         </div>
     </div>
 
-    @* ── Slots por círculo ───────────────────────────────── *@
     <div class="spell-slots-block">
         <div class="spell-slots-title">Espaços de Magia</div>
         <div class="spell-slots-grid">
             @foreach (var circle in SlotCircles)
             {
-                var total  = ISlotSpell($"slots_{circle}_total");
-                var gastos = ISlotSpell($"slots_{circle}_gastos");
+                var total  = IZero($"slots_{circle}_total");
+                var gastos = IZero($"slots_{circle}_gastos");
                 <div class="spell-slot-col">
                     <div class="spell-slot-circle-label">@circle°</div>
                     <div class="spell-slot-row">
                         <input type="number" min="0" max="@(circle == 1 ? 4 : 3)"
-                               value="@total"
-                               @onchange='e=>S($"slots_{circle}_total", e.Value)'
-                               title="Total de slots" />
+                               value="@total" @onchange='e=>S($"slots_{circle}_total", e.Value)' />
                         <span class="spell-slot-sep">/</span>
                         <input type="number" min="0" max="@(circle == 1 ? 4 : 3)"
-                               value="@gastos"
-                               @onchange='e=>S($"slots_{circle}_gastos", e.Value)'
-                               title="Gastos" />
+                               value="@gastos" @onchange='e=>S($"slots_{circle}_gastos", e.Value)' />
                     </div>
                     <div class="spell-slot-pips">
-                        @for (int p = 0; p < Math.Max(total, 1); p++)
+                        @for (int p = 0; p < Math.Min(Math.Max(total,0), circle==1?4:3); p++)
                         {
                             var pip = p;
                             <span class="spell-pip @(pip < gastos ? "used" : "")"></span>
@@ -322,113 +367,68 @@
         </div>
     </div>
 
-    @* ── Título + botão adicionar ────────────────────────── *@
     <div class="spell-list-title">
         <span>Truques e Magias Preparadas</span>
         <button class="btn-add-spell" @onclick="AddSpell">+ Adicionar Magia</button>
     </div>
 
-    @* ── Cards de magia ──────────────────────────────────── *@
     @for (int i = 0; i < Spells.Count; i++)
     {
         var idx = i;
         var sp  = Spells[idx];
-
         <div class="spell-card @(sp.Expanded ? "is-open" : "")">
-
-            @* Linha do topo: círculo | nome | escola | flags | botão expandir | deletar *@
             <div class="spell-card-top">
-
-                <div class="spell-badge-circle" title="Círculo (0 = truque)">
-                    <input type="number" min="0" max="9"
-                           value="@sp.Circulo"
+                <div class="spell-badge-circle">
+                    <input type="number" min="0" max="9" value="@sp.Circulo"
                            @onchange='e=>sp.Circulo=int.TryParse(e.Value?.ToString(),out var n)?n:0' />
                     <span>círc.</span>
                 </div>
-
-                <input class="spell-input-name" type="text"
-                       value="@sp.Nome"
-                       @onchange='e=>sp.Nome=e.Value?.ToString()??""'
-                       placeholder="Nome da magia" />
-
-                <input class="spell-input-school" type="text"
-                       value="@sp.Escola"
-                       @onchange='e=>sp.Escola=e.Value?.ToString()??""'
-                       placeholder="Escola" />
-
+                <input class="spell-input-name" type="text" value="@sp.Nome"
+                       @onchange='e=>sp.Nome=e.Value?.ToString()??""' placeholder="Nome da magia" />
+                <input class="spell-input-school" type="text" value="@sp.Escola"
+                       @onchange='e=>sp.Escola=e.Value?.ToString()??""' placeholder="Escola" />
                 <div class="spell-flags">
-                    <span class="spell-flag @(sp.Concentracao ? "on" : "")"
-                          @onclick='()=>sp.Concentracao=!sp.Concentracao'
-                          title="Concentração">C</span>
-                    <span class="spell-flag @(sp.Ritual ? "on" : "")"
-                          @onclick='()=>sp.Ritual=!sp.Ritual'
-                          title="Ritual">R</span>
-                    <span class="spell-flag @(sp.Material ? "on" : "")"
-                          @onclick='()=>sp.Material=!sp.Material'
-                          title="Requer Material">M</span>
+                    <span class="spell-flag @(sp.Concentracao?"on":"")" @onclick='()=>sp.Concentracao=!sp.Concentracao' title="Concentração">C</span>
+                    <span class="spell-flag @(sp.Ritual?"on":"")"       @onclick='()=>sp.Ritual=!sp.Ritual'             title="Ritual">R</span>
+                    <span class="spell-flag @(sp.Material?"on":"")"     @onclick='()=>sp.Material=!sp.Material'         title="Material">M</span>
                 </div>
-
-                <button class="spell-expand-btn" @onclick="()=>sp.Expanded=!sp.Expanded"
-                        title="@(sp.Expanded ? "Recolher" : "Ver detalhes")">
+                <button class="spell-expand-btn" @onclick="()=>sp.Expanded=!sp.Expanded">
                     @(sp.Expanded ? "▲ Recolher" : "▼ Detalhes")
                 </button>
-
-                <button class="spell-del-btn" @onclick='()=>Spells.RemoveAt(idx)'
-                        title="Remover magia">✕</button>
+                <button class="spell-del-btn" @onclick='()=>Spells.RemoveAt(idx)'>✕</button>
             </div>
-
-            @* Painel de detalhes — visível só quando expandido *@
             @if (sp.Expanded)
             {
                 <div class="spell-card-body">
-
-                    @* Linha de metadados *@
                     <div class="spell-meta-grid">
                         <div class="spell-meta-field">
                             <label>Tempo de Conjuração</label>
-                            <input type="text" value="@sp.TempoCast"
-                                   @onchange='e=>sp.TempoCast=e.Value?.ToString()??""'
-                                   placeholder="1 Ação" />
+                            <input type="text" value="@sp.TempoCast" @onchange='e=>sp.TempoCast=e.Value?.ToString()??""' placeholder="1 Ação" />
                         </div>
                         <div class="spell-meta-field">
                             <label>Alcance</label>
-                            <input type="text" value="@sp.Alcance"
-                                   @onchange='e=>sp.Alcance=e.Value?.ToString()??""'
-                                   placeholder="9 m" />
+                            <input type="text" value="@sp.Alcance" @onchange='e=>sp.Alcance=e.Value?.ToString()??""' placeholder="9 m" />
                         </div>
                         <div class="spell-meta-field">
                             <label>Duração</label>
-                            <input type="text" value="@sp.Duracao"
-                                   @onchange='e=>sp.Duracao=e.Value?.ToString()??""'
-                                   placeholder="Instantânea" />
+                            <input type="text" value="@sp.Duracao" @onchange='e=>sp.Duracao=e.Value?.ToString()??""' placeholder="Instantânea" />
                         </div>
                         <div class="spell-meta-field">
                             <label>Componentes / Material</label>
-                            <input type="text" value="@sp.Componentes"
-                                   @onchange='e=>sp.Componentes=e.Value?.ToString()??""'
-                                   placeholder="V, S, M (cobre...)" />
+                            <input type="text" value="@sp.Componentes" @onchange='e=>sp.Componentes=e.Value?.ToString()??""' placeholder="V, S, M..." />
                         </div>
                         <div class="spell-meta-field">
                             <label>Dano / Efeito Principal</label>
-                            <input type="text" value="@sp.DanoEfeito"
-                                   @onchange='e=>sp.DanoEfeito=e.Value?.ToString()??""'
-                                   placeholder="2d8 fogo, CD 15 Des..." />
+                            <input type="text" value="@sp.DanoEfeito" @onchange='e=>sp.DanoEfeito=e.Value?.ToString()??""' placeholder="2d8 fogo..." />
                         </div>
                     </div>
-
-                    @* Descrição completa *@
                     <div class="spell-desc-block">
                         <label class="spell-desc-label">Descrição Completa</label>
-                        <textarea class="spell-desc-area"
-                                  @bind="sp.Descricao"
-                                  @bind:event="oninput"
-                                  rows="5"
-                                  placeholder="Cole aqui a descrição do livro. A caixa cresce conforme o texto..."></textarea>
+                        <textarea class="spell-desc-area" @bind="sp.Descricao" @bind:event="oninput" rows="5"
+                                  placeholder="Cole aqui a descrição do livro..."></textarea>
                     </div>
-
                 </div>
             }
-
         </div>
     }
 
@@ -439,7 +439,6 @@
             Clique em <strong>+ Adicionar Magia</strong> para começar.
         </div>
     }
-
 </div>
 }
 
@@ -450,8 +449,6 @@
 {
 <div class="dnd-sheet">
     <div class="dnd-row-2" style="margin-bottom:1rem;">
-
-        @* Moedas *@
         <div class="dnd-section-box">
             <label class="dnd-section-label">Moedas</label>
             <div class="dnd-coins">
@@ -464,24 +461,19 @@
                 }
             </div>
         </div>
-
-        @* Itens Mágicos Sintonizados *@
         <div class="dnd-section-box">
             <label class="dnd-section-label">Itens Mágicos Sintonizados</label>
-            @for (int i = 0; i < 3; i++) {
-                var idx = i;
+            @for (int i = 0; i < 3; i++) { var idx = i;
                 <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
                     <span style="color:#9a7c2a;font-size:0.8rem;">✦</span>
                     <input type="text" value="@V($"sintonizado_{idx}")"
                            @onchange='e=>S($"sintonizado_{idx}",e.Value)'
-                           placeholder="Item sintonizado..."
-                           style="flex:1;" />
+                           placeholder="Item sintonizado..." style="flex:1;" />
                 </div>
             }
         </div>
     </div>
 
-    @* Lista de equipamentos *@
     <div class="dnd-section-box">
         <div style="display:flex;justify-content:space-between;align-items:center;">
             <label class="dnd-section-label" style="margin-bottom:0;">Equipamentos</label>
@@ -496,23 +488,19 @@
             <span style="width:28px">Cons.</span>
             <span style="width:30px"></span>
         </div>
-        @for (int i = 0; i < Items.Count; i++) {
-            var idx = i;
-            var it  = Items[idx];
+        @for (int i = 0; i < Items.Count; i++) { var idx = i; var it = Items[idx];
             <div class="eq-row">
-                <input type="text"   value="@it.Nome"     @onchange='e=>it.Nome=e.Value?.ToString()??""'     placeholder="Nome..." />
-                <input type="text"   value="@it.Qtd"      @onchange='e=>it.Qtd=e.Value?.ToString()??""'      placeholder="1" />
-                <input type="text"   value="@it.Efeito"   @onchange='e=>it.Efeito=e.Value?.ToString()??""'   placeholder="Efeito..." />
-                <input type="text"   value="@it.Mecanica" @onchange='e=>it.Mecanica=e.Value?.ToString()??""' placeholder="Dano, CD..." />
-                <input type="text"   value="@it.Notas"    @onchange='e=>it.Notas=e.Value?.ToString()??""'    placeholder="Notas..." />
-                <span class="spell-check @(it.Consumivel ? "on" : "")"
-                      @onclick='()=>it.Consumivel=!it.Consumivel'>✓</span>
+                <input type="text" value="@it.Nome"     @onchange='e=>it.Nome=e.Value?.ToString()??""'     placeholder="Nome..." />
+                <input type="text" value="@it.Qtd"      @onchange='e=>it.Qtd=e.Value?.ToString()??""'      placeholder="1" />
+                <input type="text" value="@it.Efeito"   @onchange='e=>it.Efeito=e.Value?.ToString()??""'   placeholder="Efeito..." />
+                <input type="text" value="@it.Mecanica" @onchange='e=>it.Mecanica=e.Value?.ToString()??""' placeholder="Dano, CD..." />
+                <input type="text" value="@it.Notas"    @onchange='e=>it.Notas=e.Value?.ToString()??""'    placeholder="Notas..." />
+                <span class="spell-check @(it.Consumivel?"on":"")" @onclick='()=>it.Consumivel=!it.Consumivel'>✓</span>
                 <button class="spell-del" @onclick='()=>Items.RemoveAt(idx)'>✕</button>
             </div>
         }
     </div>
 
-    @* Idiomas e aparência *@
     <div class="dnd-row-2" style="margin-top:1rem;">
         <div class="dnd-section-box dnd-grow">
             <label class="dnd-section-label">Idiomas</label>
@@ -534,688 +522,212 @@
    CSS
    ============================================================ *@
 <style>
-    /* Abas */
-    .sheet-tabs {
-        display: flex;
-        gap: 4px;
-        margin-bottom: 1rem;
-        border-bottom: 2px solid #c9a84c;
-        padding-bottom: 0;
-    }
+    .sheet-tabs { display:flex; gap:4px; margin-bottom:1rem; border-bottom:2px solid #c9a84c; }
     .sheet-tab {
-        font-family: 'Cinzel', serif;
-        font-size: 0.72rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        padding: 0.45rem 1.25rem;
-        background: transparent;
-        border: 1px solid #9a7c2a;
-        border-bottom: none;
-        border-radius: 4px 4px 0 0;
-        color: #6b4c28;
-        cursor: pointer;
-        transition: all 0.15s;
+        font-family:'Cinzel',serif; font-size:0.72rem; font-weight:600;
+        letter-spacing:0.08em; text-transform:uppercase;
+        padding:0.45rem 1.25rem; background:transparent;
+        border:1px solid #9a7c2a; border-bottom:none;
+        border-radius:4px 4px 0 0; color:#6b4c28; cursor:pointer; transition:all 0.15s;
     }
-    .sheet-tab.active, .sheet-tab:hover {
-        background: #c9a84c;
-        color: #1c1008;
-    }
+    .sheet-tab.active, .sheet-tab:hover { background:#c9a84c; color:#1c1008; }
 
-    /* Folha base */
     .dnd-sheet {
-        background: #f5ead6;
-        border: 2px solid #c9a84c;
-        border-radius: 0 8px 8px 8px;
-        padding: 1rem;
-        color: #1c1008;
-        font-family: 'Crimson Text', serif;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        background:#f5ead6; border:2px solid #c9a84c; border-radius:0 8px 8px 8px;
+        padding:1rem; color:#1c1008; font-family:'Crimson Text',serif;
+        box-shadow:0 4px 20px rgba(0,0,0,0.4);
     }
 
-    /* Campos de header */
-    .dnd-header {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr 80px 80px;
-        gap: 8px;
-        margin-bottom: 0.75rem;
-    }
+    .dnd-header { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr 80px 80px; gap:8px; margin-bottom:0.75rem; }
 
-    .dnd-field {
-        display: flex;
-        flex-direction: column-reverse;
-        border: 1px solid #9a7c2a;
-        border-radius: 4px;
-        background: #fdf6e3;
-        padding: 4px 6px 2px;
-    }
-    .dnd-field input {
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid rgba(61,43,15,0.25);
-        color: #1c1008;
-        font-family: 'Crimson Text', serif;
-        font-size: 1rem;
-        outline: none;
-        width: 100%;
-        padding: 1px 0;
-    }
-    .dnd-field label {
-        font-family: 'Cinzel', serif;
-        font-size: 0.54rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #6b4c28;
-        letter-spacing: 0.04em;
-    }
+    .dnd-field { display:flex; flex-direction:column-reverse; border:1px solid #9a7c2a; border-radius:4px; background:#fdf6e3; padding:4px 6px 2px; }
+    .dnd-field input { background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.25); color:#1c1008; font-family:'Crimson Text',serif; font-size:1rem; outline:none; width:100%; padding:1px 0; }
+    .dnd-field label { font-family:'Cinzel',serif; font-size:0.54rem; font-weight:600; text-transform:uppercase; color:#6b4c28; letter-spacing:0.04em; }
 
-    /* Corpo */
-    .dnd-body {
-        display: grid;
-        grid-template-columns: 140px 1fr 1.1fr;
-        gap: 10px;
-        align-items: start;
-    }
+    .dnd-body { display:grid; grid-template-columns:140px 1fr 1.1fr; gap:10px; align-items:start; }
+    .dnd-col-left { display:flex; flex-direction:column; gap:6px; }
+    .dnd-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
-    /* Coluna esquerda */
-    .dnd-col-left { display: flex; flex-direction: column; gap: 6px; }
+    .dnd-stat-box { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:4px; text-align:center; display:flex; flex-direction:column-reverse; }
+    .dnd-stat-box input { background:transparent; border:none; color:#1c1008; font-size:1.2rem; font-weight:bold; text-align:center; outline:none; width:100%; -moz-appearance:textfield; }
+    .dnd-stat-box input::-webkit-inner-spin-button, .dnd-stat-box input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .dnd-stat-box label { font-family:'Cinzel',serif; font-size:0.5rem; color:#6b4c28; text-transform:uppercase; letter-spacing:0.04em; }
 
-    .dnd-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .dnd-attr-block { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:6px; padding:4px; text-align:center; }
+    .dnd-attr-name { font-family:'Cinzel',serif; font-size:0.54rem; font-weight:700; text-transform:uppercase; color:#6b4c28; margin-bottom:2px; }
+    .dnd-attr-inner { display:flex; align-items:center; justify-content:center; gap:4px; margin-bottom:4px; }
+    .dnd-attr-score { font-size:1.5rem; font-weight:bold; border:none !important; width:54px; background:transparent; outline:none; text-align:center; color:#1c1008; -moz-appearance:textfield; }
+    .dnd-attr-score::-webkit-inner-spin-button, .dnd-attr-score::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .dnd-attr-mod { width:32px; height:22px; background:#f5ead6; border:1px solid #9a7c2a; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:bold; color:#3d2b0f; }
+    .dnd-save-inline { display:flex; align-items:center; gap:4px; border-top:1px solid rgba(61,43,15,0.15); padding-top:3px; }
+    .dnd-save-val { font-size:0.75rem; font-weight:bold; width:22px; text-align:right; }
+    .dnd-save-lbl { font-size:0.58rem; color:#6b4c28; }
+    .dnd-passive-box { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:4px 6px; display:flex; align-items:center; gap:6px; }
+    .dnd-passive-val { font-size:1.1rem; font-weight:bold; }
+    .dnd-passive-lbl { font-family:'Cinzel',serif; font-size:0.5rem; color:#6b4c28; text-transform:uppercase; }
 
-    .dnd-stat-box {
-        background: #fdf6e3;
-        border: 1px solid #9a7c2a;
-        border-radius: 4px;
-        padding: 4px;
-        text-align: center;
-        display: flex;
-        flex-direction: column-reverse;
-    }
-    .dnd-stat-box input {
-        background: transparent; border: none;
-        color: #1c1008; font-size: 1.2rem; font-weight: bold;
-        text-align: center; outline: none; width: 100%;
-        -moz-appearance: textfield;
-    }
-    .dnd-stat-box input::-webkit-inner-spin-button,
-    .dnd-stat-box input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .dnd-stat-box label {
-        font-family: 'Cinzel', serif; font-size: 0.5rem;
-        color: #6b4c28; text-transform: uppercase; letter-spacing: 0.04em;
-    }
+    .dnd-circle { width:11px; height:11px; border:1.5px solid #9a7c2a; border-radius:50%; display:inline-block; cursor:pointer; flex-shrink:0; transition:background 0.1s; }
+    .dnd-circle.filled { background:#9a7c2a; }
+    .dnd-circle.expert { background:#c9a84c; border-color:#c9a84c; }
+    .dnd-circle.danger { border-color:#7a1515; }
+    .dnd-circle.danger.filled { background:#7a1515; }
 
-    .dnd-attr-block {
-        background: #fdf6e3;
-        border: 1px solid #9a7c2a;
-        border-radius: 6px;
-        padding: 4px;
-        text-align: center;
-    }
-    .dnd-attr-name {
-        font-family: 'Cinzel', serif; font-size: 0.54rem;
-        font-weight: 700; text-transform: uppercase; color: #6b4c28;
-        margin-bottom: 2px;
-    }
-    .dnd-attr-inner {
-        display: flex; align-items: center; justify-content: center; gap: 4px;
-        margin-bottom: 4px;
-    }
-    .dnd-attr-score {
-        font-size: 1.5rem; font-weight: bold;
-        border: none !important; width: 54px; background: transparent;
-        outline: none; text-align: center; color: #1c1008;
-        -moz-appearance: textfield;
-    }
-    .dnd-attr-score::-webkit-inner-spin-button,
-    .dnd-attr-score::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .dnd-attr-mod {
-        width: 32px; height: 22px;
-        background: #f5ead6; border: 1px solid #9a7c2a; border-radius: 11px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 0.8rem; font-weight: bold; color: #3d2b0f;
-    }
-    .dnd-save-inline {
-        display: flex; align-items: center; gap: 4px;
-        border-top: 1px solid rgba(61,43,15,0.15); padding-top: 3px;
-    }
-    .dnd-save-val { font-size: 0.75rem; font-weight: bold; width: 22px; text-align: right; }
-    .dnd-save-lbl { font-size: 0.58rem; color: #6b4c28; }
+    .dnd-col-center { display:flex; flex-direction:column; gap:8px; }
+    .dnd-combat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    .dnd-combat-box { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:4px; text-align:center; display:flex; flex-direction:column-reverse; }
+    .dnd-combat-box input { background:transparent; border:none; color:#1c1008; font-size:1.3rem; font-weight:bold; text-align:center; outline:none; width:100%; -moz-appearance:textfield; }
+    .dnd-combat-box input::-webkit-inner-spin-button, .dnd-combat-box input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .dnd-combat-box label { font-family:'Cinzel',serif; font-size:0.5rem; color:#6b4c28; text-transform:uppercase; }
 
-    .dnd-passive-box {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px;
-        padding: 4px 6px; display: flex; align-items: center; gap: 6px;
-    }
-    .dnd-passive-val { font-size: 1.1rem; font-weight: bold; }
-    .dnd-passive-lbl { font-family: 'Cinzel', serif; font-size: 0.5rem; color: #6b4c28; text-transform: uppercase; }
+    .dnd-hp-block { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:6px; }
+    .dnd-hp-row { display:flex; gap:6px; margin-bottom:2px; }
+    .dnd-hp-sub { flex:1; text-align:center; }
+    .dnd-hp-sub label { font-family:'Cinzel',serif; font-size:0.5rem; color:#6b4c28; text-transform:uppercase; display:block; }
+    .dnd-hp-sub input { background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.3); color:#1c1008; font-size:1.4rem; font-weight:bold; text-align:center; outline:none; width:100%; -moz-appearance:textfield; }
+    .dnd-hp-sub input::-webkit-inner-spin-button, .dnd-hp-sub input::-webkit-outer-spin-button { -webkit-appearance:none; }
 
-    /* Círculos de proficiência */
-    .dnd-circle {
-        width: 11px; height: 11px;
-        border: 1.5px solid #9a7c2a;
-        border-radius: 50%;
-        display: inline-block;
-        cursor: pointer;
-        flex-shrink: 0;
-        transition: background 0.1s;
-    }
-    .dnd-circle.filled { background: #9a7c2a; }
-    .dnd-circle.expert { background: #c9a84c; border-color: #c9a84c; }
-    .dnd-circle.danger { border-color: #7a1515; }
-    .dnd-circle.danger.filled { background: #7a1515; }
+    .dnd-box-inner { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:6px; }
+    .dnd-box-inner input { background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.25); color:#1c1008; font-size:1rem; text-align:center; outline:none; width:100%; }
+    .dnd-death-row { display:flex; align-items:center; gap:4px; margin-top:3px; }
 
-    /* Coluna central */
-    .dnd-col-center { display: flex; flex-direction: column; gap: 8px; }
+    .dnd-skills-box { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:6px; }
+    .dnd-skill-row { display:flex; align-items:center; gap:4px; padding:1px 0; border-bottom:1px solid rgba(61,43,15,0.08); }
+    .dnd-skill-val { font-weight:bold; font-size:0.8rem; width:22px; text-align:right; }
+    .dnd-skill-name { font-size:0.85rem; flex:1; }
+    .dnd-skill-attr { font-size:0.65rem; color:#9a7c2a; }
 
-    .dnd-combat-row {
-        display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-    }
-    .dnd-combat-box {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px;
-        padding: 4px; text-align: center;
-        display: flex; flex-direction: column-reverse;
-    }
-    .dnd-combat-box input {
-        background: transparent; border: none; color: #1c1008;
-        font-size: 1.3rem; font-weight: bold; text-align: center;
-        outline: none; width: 100%; -moz-appearance: textfield;
-    }
-    .dnd-combat-box input::-webkit-inner-spin-button,
-    .dnd-combat-box input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .dnd-combat-box label {
-        font-family: 'Cinzel', serif; font-size: 0.5rem;
-        color: #6b4c28; text-transform: uppercase;
-    }
+    .dnd-col-right { display:flex; flex-direction:column; gap:8px; }
+    .dnd-section-label { font-family:'Cinzel',serif; font-size:0.6rem; font-weight:700; text-transform:uppercase; color:#6b4c28; letter-spacing:0.06em; display:block; text-align:center; border-bottom:1px solid rgba(61,43,15,0.2); padding-bottom:3px; margin-bottom:5px; }
+    .dnd-section-box { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:4px; padding:6px; }
+    .dnd-grow { flex:1; min-height:80px; }
+    .dnd-textarea-grow { width:100%; border:none; background:transparent; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.9rem; resize:vertical; outline:none; min-height:70px; line-height:1.5; }
+    .dnd-textarea-sm { width:100%; border:none; background:transparent; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.88rem; resize:vertical; outline:none; min-height:50px; line-height:1.5; }
 
-    .dnd-hp-block {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px; padding: 6px;
-    }
-    .dnd-hp-row { display: flex; gap: 6px; margin-bottom: 2px; }
-    .dnd-hp-sub { flex: 1; text-align: center; }
-    .dnd-hp-sub label {
-        font-family: 'Cinzel', serif; font-size: 0.5rem;
-        color: #6b4c28; text-transform: uppercase; display: block;
-    }
-    .dnd-hp-sub input {
-        background: transparent; border: none; border-bottom: 1px solid rgba(61,43,15,0.3);
-        color: #1c1008; font-size: 1.4rem; font-weight: bold;
-        text-align: center; outline: none; width: 100%;
-        -moz-appearance: textfield;
-    }
-    .dnd-hp-sub input::-webkit-inner-spin-button,
-    .dnd-hp-sub input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    /* ── Armas ─────────────────────────────────────────── */
+    .weapon-list-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
 
-    .dnd-box-inner {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px; padding: 6px;
-    }
-    .dnd-box-inner input {
-        background: transparent; border: none; border-bottom: 1px solid rgba(61,43,15,0.25);
-        color: #1c1008; font-size: 1rem; text-align: center; outline: none; width: 100%;
-    }
+    .weapon-card { background:#fdf6e3; border:1px solid rgba(154,124,42,0.3); border-radius:6px; margin-bottom:5px; overflow:hidden; transition:border-color 0.15s; }
+    .weapon-card.is-open { border-color:#9a7c2a; box-shadow:0 2px 10px rgba(61,43,15,0.12); }
 
-    .dnd-death-row { display: flex; align-items: center; gap: 4px; margin-top: 3px; }
+    .weapon-card-top { display:flex; align-items:center; gap:8px; padding:7px 10px; }
 
-    .dnd-skills-box {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px; padding: 6px;
+    .weapon-input-name {
+        flex:2; background:transparent; border:none;
+        border-bottom:1.5px solid rgba(154,124,42,0.4);
+        color:#1c1008; font-family:'Crimson Text',serif;
+        font-size:1.05rem; font-weight:600; outline:none; padding:2px 4px; min-width:0;
     }
-    .dnd-skill-row {
-        display: flex; align-items: center; gap: 4px;
-        padding: 1px 0; border-bottom: 1px solid rgba(61,43,15,0.08);
-    }
-    .dnd-skill-val { font-weight: bold; font-size: 0.8rem; width: 22px; text-align: right; }
-    .dnd-skill-name { font-size: 0.85rem; flex: 1; }
-    .dnd-skill-attr { font-size: 0.65rem; color: #9a7c2a; }
+    .weapon-input-name::placeholder { color:#b0986a; font-style:italic; font-weight:400; }
+    .weapon-input-name:focus { border-bottom-color:#9a7c2a; }
 
-    /* Coluna direita */
-    .dnd-col-right { display: flex; flex-direction: column; gap: 8px; }
+    .weapon-input-sm {
+        flex:1; background:transparent; border:none;
+        border-bottom:1px solid rgba(154,124,42,0.3);
+        color:#6b4c28; font-family:'Crimson Text',serif;
+        font-size:0.95rem; outline:none; padding:2px 4px; min-width:0; text-align:center;
+    }
+    .weapon-input-sm::placeholder { color:#b0986a; }
 
-    .dnd-section-label {
-        font-family: 'Cinzel', serif; font-size: 0.6rem; font-weight: 700;
-        text-transform: uppercase; color: #6b4c28; letter-spacing: 0.06em;
-        display: block; text-align: center;
-        border-bottom: 1px solid rgba(61,43,15,0.2);
-        padding-bottom: 3px; margin-bottom: 5px;
-    }
+    .weapon-card-body { border-top:1px solid rgba(154,124,42,0.25); padding:10px 12px 12px; background:rgba(245,234,214,0.4); }
 
-    .dnd-section-box {
-        background: #fdf6e3; border: 1px solid #9a7c2a; border-radius: 4px; padding: 6px;
-    }
-    .dnd-grow { flex: 1; min-height: 80px; }
+    .weapon-meta-grid { display:grid; grid-template-columns:1fr 1fr 2fr 1fr 1fr; gap:10px; margin-bottom:10px; }
 
-    .dnd-attacks-header {
-        display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr;
-        gap: 4px;
-        font-family: 'Cinzel', serif; font-size: 0.52rem; font-weight: 600;
-        text-transform: uppercase; color: #6b4c28;
-        border-bottom: 1px solid rgba(61,43,15,0.2); padding-bottom: 3px; margin-bottom: 3px;
-    }
-    .dnd-attack-row {
-        display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr;
-        gap: 4px; border-bottom: 1px solid rgba(61,43,15,0.08); padding: 2px 0;
-    }
-    .dnd-attack-row input {
-        background: transparent; border: none; color: #1c1008;
-        font-family: 'Crimson Text', serif; font-size: 0.85rem; outline: none; width: 100%;
-    }
+    /* ── Magias ─────────────────────────────────────────── */
+    .spell-header-box { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:0.75rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(154,124,42,0.3); }
 
-    .dnd-textarea-grow {
-        width: 100%; border: none; background: transparent;
-        color: #1c1008; font-family: 'Crimson Text', serif; font-size: 0.9rem;
-        resize: vertical; outline: none; min-height: 70px; line-height: 1.5;
-    }
-    .dnd-textarea-sm {
-        width: 100%; border: none; background: transparent;
-        color: #1c1008; font-family: 'Crimson Text', serif; font-size: 0.88rem;
-        resize: vertical; outline: none; min-height: 50px; line-height: 1.5;
-    }
+    .spell-slots-block { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:6px; padding:8px 10px; margin-bottom:0.75rem; }
+    .spell-slots-title { font-family:'Cinzel',serif; font-size:0.62rem; font-weight:700; text-transform:uppercase; color:#6b4c28; letter-spacing:0.08em; text-align:center; border-bottom:1px solid rgba(61,43,15,0.2); padding-bottom:5px; margin-bottom:8px; }
+    .spell-slots-grid { display:grid; grid-template-columns:repeat(9,1fr); gap:6px; }
+    .spell-slot-col { text-align:center; }
+    .spell-slot-circle-label { font-family:'Cinzel',serif; font-size:0.7rem; font-weight:700; color:#3d2b0f; margin-bottom:3px; }
+    .spell-slot-row { display:flex; align-items:center; justify-content:center; gap:2px; }
+    .spell-slot-row input { width:26px; background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.3); color:#1c1008; font-size:0.95rem; font-weight:bold; text-align:center; outline:none; -moz-appearance:textfield; }
+    .spell-slot-row input::-webkit-inner-spin-button, .spell-slot-row input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .spell-slot-sep { font-size:0.7rem; color:#9a7c2a; }
+    .spell-slot-pips { display:flex; flex-wrap:wrap; justify-content:center; gap:3px; margin:4px 0 2px; min-height:10px; }
+    .spell-pip { width:9px; height:9px; border-radius:50%; border:1.5px solid #9a7c2a; background:#fdf6e3; display:inline-block; transition:background 0.15s; }
+    .spell-pip.used { background:#9a7c2a; }
+    .spell-slot-sublabel { font-family:'Cinzel',serif; font-size:0.44rem; color:#9a7c2a; letter-spacing:0.04em; text-transform:uppercase; }
 
-    /* ── Aba Magias ──────────────────────────── */
-    .spell-header {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-        margin-bottom: 0.75rem;
-    }
+    .spell-list-title { display:flex; justify-content:space-between; align-items:center; font-family:'Cinzel',serif; font-size:0.65rem; font-weight:700; text-transform:uppercase; color:#6b4c28; letter-spacing:0.08em; border-bottom:2px solid #9a7c2a; padding-bottom:5px; margin-bottom:8px; }
 
-    .spell-list-header {
-        display: flex; align-items: center; gap: 4px;
-        background: #e8d8b0; border-radius: 4px;
-        padding: 4px 6px; margin-bottom: 4px;
-        font-family: 'Cinzel', serif; font-size: 0.54rem;
-        font-weight: 700; text-transform: uppercase; color: #6b4c28;
-    }
-    .spell-list-header span { flex-shrink: 0; }
+    .spell-card { background:#fdf6e3; border:1px solid rgba(154,124,42,0.3); border-radius:6px; margin-bottom:6px; overflow:hidden; transition:border-color 0.15s, box-shadow 0.15s; }
+    .spell-card.is-open { border-color:#9a7c2a; box-shadow:0 2px 10px rgba(61,43,15,0.12); }
+    .spell-card-top { display:flex; align-items:center; gap:8px; padding:8px 10px; }
+    .spell-badge-circle { display:flex; flex-direction:column; align-items:center; background:#e8d8b0; border:1px solid #9a7c2a; border-radius:4px; padding:3px 4px; min-width:42px; flex-shrink:0; }
+    .spell-badge-circle input { width:34px; background:transparent; border:none; color:#1c1008; font-size:1.2rem; font-weight:bold; text-align:center; outline:none; -moz-appearance:textfield; }
+    .spell-badge-circle input::-webkit-inner-spin-button, .spell-badge-circle input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .spell-badge-circle span { font-family:'Cinzel',serif; font-size:0.46rem; color:#6b4c28; text-transform:uppercase; letter-spacing:0.06em; }
+    .spell-input-name { flex:2; background:transparent; border:none; border-bottom:1.5px solid rgba(154,124,42,0.4); color:#1c1008; font-family:'Crimson Text',serif; font-size:1.15rem; font-weight:600; outline:none; padding:2px 4px; min-width:0; }
+    .spell-input-name:focus { border-bottom-color:#9a7c2a; }
+    .spell-input-name::placeholder { color:#b0986a; font-style:italic; font-weight:400; }
+    .spell-input-school { flex:1; background:transparent; border:none; border-bottom:1px solid rgba(154,124,42,0.3); color:#6b4c28; font-family:'Crimson Text',serif; font-size:0.95rem; font-style:italic; outline:none; padding:2px 4px; min-width:0; }
+    .spell-flags { display:flex; gap:4px; flex-shrink:0; }
+    .spell-flag { width:26px; height:26px; border:1.5px solid #9a7c2a; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:0.65rem; font-weight:700; cursor:pointer; color:#9a7c2a; user-select:none; transition:all 0.1s; }
+    .spell-flag.on { background:#9a7c2a; color:#fdf6e3; }
 
-    .spell-row {
-        background: #fdf6e3; border: 1px solid rgba(154,124,42,0.3);
-        border-radius: 4px; margin-bottom: 3px;
-        transition: border-color 0.15s;
-    }
-    .spell-row.expanded { border-color: #9a7c2a; }
+    /* Botão expandir — compartilhado entre armas e magias */
+    .spell-expand-btn { flex-shrink:0; font-family:'Cinzel',serif; font-size:0.6rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; background:transparent; border:1px solid #9a7c2a; border-radius:4px; color:#6b4c28; padding:4px 10px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .spell-expand-btn:hover, .spell-card.is-open .spell-expand-btn, .weapon-card.is-open .spell-expand-btn { background:#9a7c2a; color:#fdf6e3; }
 
-    .spell-row-main {
-        display: flex; align-items: center; gap: 4px;
-        padding: 4px 6px; cursor: pointer;
-    }
-    .spell-row-main input {
-        background: transparent; border: none; border-bottom: 1px solid rgba(61,43,15,0.2);
-        color: #1c1008; font-family: 'Crimson Text', serif; font-size: 0.88rem;
-        outline: none; padding: 1px 2px;
-    }
-    .spell-circle { width: 40px; text-align: center; font-weight: bold; flex-shrink: 0; }
-    .spell-name { flex: 2; font-weight: 600; }
-    .spell-row-main input[class=""] { flex: 1; }
+    /* Botão deletar — compartilhado */
+    .spell-del-btn { flex-shrink:0; width:26px; height:26px; background:transparent; border:1px solid rgba(122,21,21,0.35); border-radius:4px; color:#7a1515; font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+    .spell-del-btn:hover { background:#7a1515; color:#fdf6e3; }
 
-    .spell-check {
-        width: 22px; height: 22px; flex-shrink: 0;
-        border: 1px solid #9a7c2a; border-radius: 3px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 0.6rem; font-weight: bold; cursor: pointer;
-        color: #9a7c2a; user-select: none;
-    }
-    .spell-check.on { background: #9a7c2a; color: #fdf6e3; }
+    .spell-card-body { border-top:1px solid rgba(154,124,42,0.25); padding:10px 12px 12px; background:rgba(245,234,214,0.4); }
+    .spell-meta-grid { display:grid; grid-template-columns:1fr 1fr 1fr 2fr 2fr; gap:10px; margin-bottom:10px; }
+    .spell-meta-field { display:flex; flex-direction:column-reverse; }
+    .spell-meta-field label { font-family:'Cinzel',serif; font-size:0.54rem; font-weight:600; text-transform:uppercase; color:#6b4c28; letter-spacing:0.05em; margin-top:3px; }
+    .spell-meta-field input { background:transparent; border:none; border-bottom:1px solid rgba(154,124,42,0.4); color:#1c1008; font-family:'Crimson Text',serif; font-size:0.95rem; outline:none; padding:2px; width:100%; }
+    .spell-meta-field input:focus { border-bottom-color:#9a7c2a; }
+    .spell-desc-block { margin-top:4px; }
+    .spell-desc-label { font-family:'Cinzel',serif; font-size:0.56rem; font-weight:600; text-transform:uppercase; color:#6b4c28; letter-spacing:0.06em; display:block; margin-bottom:5px; }
+    .spell-desc-area { width:100%; border:1px solid rgba(154,124,42,0.3); border-radius:4px; background:#fdf6e3; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.95rem; line-height:1.65; outline:none; resize:vertical; min-height:90px; padding:6px 8px; }
+    .spell-desc-area:focus { border-color:#9a7c2a; }
+    .spell-empty { text-align:center; padding:2.5rem; font-family:'Crimson Text',serif; font-style:italic; color:#9a7c5a; font-size:1rem; line-height:1.8; }
 
-    .spell-del {
-        width: 22px; height: 22px; flex-shrink: 0;
-        background: transparent; border: 1px solid rgba(122,21,21,0.4);
-        border-radius: 3px; color: #7a1515; font-size: 0.7rem;
-        cursor: pointer; display: flex; align-items: center; justify-content: center;
-    }
-    .spell-del:hover { background: #7a1515; color: #fdf6e3; }
+    /* Botão adicionar — compartilhado */
+    .btn-add-spell { font-family:'Cinzel',serif; font-size:0.62rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; background:transparent; border:1px solid #9a7c2a; border-radius:4px; color:#6b4c28; padding:5px 14px; cursor:pointer; transition:all 0.15s; }
+    .btn-add-spell:hover { background:#9a7c2a; color:#fdf6e3; }
 
-    .spell-description {
-        padding: 6px 8px; border-top: 1px solid rgba(154,124,42,0.3);
-    }
-    .spell-description label {
-        font-family: 'Cinzel', serif; font-size: 0.56rem;
-        color: #6b4c28; text-transform: uppercase; display: block; margin-bottom: 4px;
-    }
-    .spell-description textarea {
-        width: 100%; border: none; background: rgba(245,234,214,0.6);
-        border-radius: 3px; color: #1c1008;
-        font-family: 'Crimson Text', serif; font-size: 0.9rem;
-        outline: none; resize: vertical; padding: 4px; line-height: 1.5;
-    }
-
-    .btn-add-spell {
-        margin-top: 8px;
-        font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 600;
-        letter-spacing: 0.08em; text-transform: uppercase;
-        background: transparent; border: 1px solid #9a7c2a;
-        border-radius: 4px; color: #6b4c28; padding: 6px 14px;
-        cursor: pointer; transition: all 0.15s;
-    }
-    .btn-add-spell:hover { background: #9a7c2a; color: #fdf6e3; }
-
-    /* ── Aba Equipamentos ──────────────────────────── */
-    .dnd-coins { display: flex; gap: 8px; }
-    .dnd-coin { flex: 1; text-align: center; }
-    .dnd-coin input {
-        background: transparent; border: none; border-bottom: 1px solid rgba(61,43,15,0.3);
-        color: #1c1008; font-size: 1.2rem; font-weight: bold;
-        text-align: center; outline: none; width: 100%;
-        -moz-appearance: textfield;
-    }
-    .dnd-coin input::-webkit-inner-spin-button,
-    .dnd-coin input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .dnd-coin label {
-        font-family: 'Cinzel', serif; font-size: 0.55rem;
-        color: #6b4c28; text-transform: uppercase;
-    }
-
-    .eq-list-header {
-        display: flex; align-items: center; gap: 4px;
-        background: #e8d8b0; border-radius: 3px;
-        padding: 3px 5px; margin: 6px 0 3px;
-        font-family: 'Cinzel', serif; font-size: 0.52rem;
-        font-weight: 700; text-transform: uppercase; color: #6b4c28;
-    }
-    .eq-row {
-        display: flex; align-items: center; gap: 4px;
-        border-bottom: 1px solid rgba(61,43,15,0.1); padding: 3px 0;
-    }
-    .eq-row input {
-        background: transparent; border: none;
-        color: #1c1008; font-family: 'Crimson Text', serif; font-size: 0.88rem;
-        outline: none; padding: 1px 2px; flex: 1;
-    }
-
-    /* Cabeçalho de conjuração */
-    .spell-header-box {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(154,124,42,0.3);
-    }
-
-    /* Slots */
-    .spell-slots-block {
-        background: #fdf6e3;
-        border: 1px solid #9a7c2a;
-        border-radius: 6px;
-        padding: 8px 10px;
-        margin-bottom: 0.75rem;
-    }
-    .spell-slots-title {
-        font-family: 'Cinzel', serif; font-size: 0.62rem; font-weight: 700;
-        text-transform: uppercase; color: #6b4c28; letter-spacing: 0.08em;
-        text-align: center; border-bottom: 1px solid rgba(61,43,15,0.2);
-        padding-bottom: 5px; margin-bottom: 8px;
-    }
-    .spell-slots-grid {
-        display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px;
-    }
-    .spell-slot-col { text-align: center; }
-    .spell-slot-circle-label {
-        font-family: 'Cinzel', serif; font-size: 0.7rem; font-weight: 700;
-        color: #3d2b0f; margin-bottom: 3px;
-    }
-    .spell-slot-row {
-        display: flex; align-items: center; justify-content: center; gap: 2px;
-    }
-    .spell-slot-row input {
-        width: 26px; background: transparent; border: none;
-        border-bottom: 1px solid rgba(61,43,15,0.3); color: #1c1008;
-        font-size: 0.95rem; font-weight: bold; text-align: center; outline: none;
-        -moz-appearance: textfield;
-    }
-    .spell-slot-row input::-webkit-inner-spin-button,
-    .spell-slot-row input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .spell-slot-sep { font-size: 0.7rem; color: #9a7c2a; }
-    .spell-slot-pips {
-        display: flex; flex-wrap: wrap; justify-content: center;
-        gap: 3px; margin: 4px 0 2px; min-height: 10px;
-    }
-    .spell-pip {
-        width: 9px; height: 9px; border-radius: 50%;
-        border: 1.5px solid #9a7c2a; background: #fdf6e3;
-        display: inline-block; transition: background 0.15s;
-    }
-    .spell-pip.used { background: #9a7c2a; }
-    .spell-slot-sublabel {
-        font-family: 'Cinzel', serif; font-size: 0.44rem;
-        color: #9a7c2a; letter-spacing: 0.04em; text-transform: uppercase;
-    }
-
-    /* Título da lista */
-    .spell-list-title {
-        display: flex; justify-content: space-between; align-items: center;
-        font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 700;
-        text-transform: uppercase; color: #6b4c28; letter-spacing: 0.08em;
-        border-bottom: 2px solid #9a7c2a; padding-bottom: 5px; margin-bottom: 8px;
-    }
-
-    /* Card de magia */
-    .spell-card {
-        background: #fdf6e3;
-        border: 1px solid rgba(154,124,42,0.3);
-        border-radius: 6px;
-        margin-bottom: 6px;
-        overflow: hidden;
-        transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .spell-card.is-open {
-        border-color: #9a7c2a;
-        box-shadow: 0 2px 10px rgba(61,43,15,0.12);
-    }
-
-    /* Topo do card */
-    .spell-card-top {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 10px;
-    }
-
-    /* Badge do círculo */
-    .spell-badge-circle {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background: #e8d8b0;
-        border: 1px solid #9a7c2a;
-        border-radius: 4px;
-        padding: 3px 4px;
-        min-width: 42px;
-        flex-shrink: 0;
-    }
-    .spell-badge-circle input {
-        width: 34px; background: transparent; border: none;
-        color: #1c1008; font-size: 1.2rem; font-weight: bold;
-        text-align: center; outline: none; -moz-appearance: textfield;
-    }
-    .spell-badge-circle input::-webkit-inner-spin-button,
-    .spell-badge-circle input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .spell-badge-circle span {
-        font-family: 'Cinzel', serif; font-size: 0.46rem;
-        color: #6b4c28; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-
-    /* Nome da magia */
-    .spell-input-name {
-        flex: 2;
-        background: transparent;
-        border: none;
-        border-bottom: 1.5px solid rgba(154,124,42,0.4);
-        color: #1c1008;
-        font-family: 'Crimson Text', serif;
-        font-size: 1.15rem;
-        font-weight: 600;
-        outline: none;
-        padding: 2px 4px;
-        min-width: 0;
-        transition: border-color 0.15s;
-    }
-    .spell-input-name:focus { border-bottom-color: #9a7c2a; }
-    .spell-input-name::placeholder { color: #b0986a; font-style: italic; font-weight: 400; }
-
-    /* Escola */
-    .spell-input-school {
-        flex: 1;
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid rgba(154,124,42,0.3);
-        color: #6b4c28;
-        font-family: 'Crimson Text', serif;
-        font-size: 0.95rem;
-        font-style: italic;
-        outline: none;
-        padding: 2px 4px;
-        min-width: 0;
-    }
-    .spell-input-school::placeholder { color: #b0986a; }
-
-    /* Flags C/R/M */
-    .spell-flags { display: flex; gap: 4px; flex-shrink: 0; }
-    .spell-flag {
-        width: 26px; height: 26px;
-        border: 1.5px solid #9a7c2a; border-radius: 4px;
-        display: inline-flex; align-items: center; justify-content: center;
-        font-family: 'Cinzel', serif; font-size: 0.65rem; font-weight: 700;
-        cursor: pointer; color: #9a7c2a; user-select: none;
-        transition: all 0.1s;
-    }
-    .spell-flag.on { background: #9a7c2a; color: #fdf6e3; }
-
-    /* Botão expandir */
-    .spell-expand-btn {
-        flex-shrink: 0;
-        font-family: 'Cinzel', serif;
-        font-size: 0.6rem;
-        font-weight: 600;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        background: transparent;
-        border: 1px solid #9a7c2a;
-        border-radius: 4px;
-        color: #6b4c28;
-        padding: 4px 10px;
-        cursor: pointer;
-        transition: all 0.15s;
-        white-space: nowrap;
-    }
-    .spell-expand-btn:hover,
-    .spell-card.is-open .spell-expand-btn {
-        background: #9a7c2a;
-        color: #fdf6e3;
-    }
-
-    /* Botão deletar */
-    .spell-del-btn {
-        flex-shrink: 0;
-        width: 26px; height: 26px;
-        background: transparent;
-        border: 1px solid rgba(122,21,21,0.35);
-        border-radius: 4px;
-        color: #7a1515;
-        font-size: 0.7rem;
-        cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all 0.15s;
-    }
-    .spell-del-btn:hover { background: #7a1515; color: #fdf6e3; }
-
-    /* Corpo expandido */
-    .spell-card-body {
-        border-top: 1px solid rgba(154,124,42,0.25);
-        padding: 10px 12px 12px;
-        background: rgba(245,234,214,0.4);
-    }
-
-    /* Grade de metadados */
-    .spell-meta-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr 2fr 2fr;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    .spell-meta-field {
-        display: flex;
-        flex-direction: column-reverse;
-    }
-    .spell-meta-field label {
-        font-family: 'Cinzel', serif;
-        font-size: 0.54rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #6b4c28;
-        letter-spacing: 0.05em;
-        margin-top: 3px;
-    }
-    .spell-meta-field input {
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid rgba(154,124,42,0.4);
-        color: #1c1008;
-        font-family: 'Crimson Text', serif;
-        font-size: 0.95rem;
-        outline: none;
-        padding: 2px 2px;
-        width: 100%;
-        transition: border-color 0.15s;
-    }
-    .spell-meta-field input:focus { border-bottom-color: #9a7c2a; }
-
-    /* Descrição */
-    .spell-desc-block { margin-top: 4px; }
-    .spell-desc-label {
-        font-family: 'Cinzel', serif;
-        font-size: 0.56rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #6b4c28;
-        letter-spacing: 0.06em;
-        display: block;
-        margin-bottom: 5px;
-    }
-    .spell-desc-area {
-        width: 100%;
-        border: 1px solid rgba(154,124,42,0.3);
-        border-radius: 4px;
-        background: #fdf6e3;
-        color: #1c1008;
-        font-family: 'Crimson Text', serif;
-        font-size: 0.95rem;
-        line-height: 1.65;
-        outline: none;
-        resize: vertical;
-        min-height: 90px;
-        padding: 6px 8px;
-    }
-    .spell-desc-area:focus { border-color: #9a7c2a; }
-
-    /* Estado vazio */
-    .spell-empty {
-        text-align: center;
-        padding: 2.5rem;
-        font-family: 'Crimson Text', serif;
-        font-style: italic;
-        color: #9a7c5a;
-        font-size: 1rem;
-        line-height: 1.8;
-    }
-
-    /* Botão adicionar */
-    .btn-add-spell {
-        font-family: 'Cinzel', serif; font-size: 0.62rem; font-weight: 600;
-        letter-spacing: 0.08em; text-transform: uppercase;
-        background: transparent; border: 1px solid #9a7c2a;
-        border-radius: 4px; color: #6b4c28; padding: 5px 14px;
-        cursor: pointer; transition: all 0.15s;
-    }
-    .btn-add-spell:hover { background: #9a7c2a; color: #fdf6e3; }
+    /* ── Equipamentos ─────────────────────────────────── */
+    .dnd-coins { display:flex; gap:8px; }
+    .dnd-coin { flex:1; text-align:center; }
+    .dnd-coin input { background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.3); color:#1c1008; font-size:1.2rem; font-weight:bold; text-align:center; outline:none; width:100%; -moz-appearance:textfield; }
+    .dnd-coin input::-webkit-inner-spin-button, .dnd-coin input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .dnd-coin label { font-family:'Cinzel',serif; font-size:0.55rem; color:#6b4c28; text-transform:uppercase; }
+    .eq-list-header { display:flex; align-items:center; gap:4px; background:#e8d8b0; border-radius:3px; padding:3px 5px; margin:6px 0 3px; font-family:'Cinzel',serif; font-size:0.52rem; font-weight:700; text-transform:uppercase; color:#6b4c28; }
+    .eq-row { display:flex; align-items:center; gap:4px; border-bottom:1px solid rgba(61,43,15,0.1); padding:3px 0; }
+    .eq-row input { background:transparent; border:none; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.88rem; outline:none; padding:1px 2px; flex:1; }
+    .spell-check { width:22px; height:22px; flex-shrink:0; border:1px solid #9a7c2a; border-radius:3px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; font-weight:bold; cursor:pointer; color:#9a7c2a; user-select:none; }
+    .spell-check.on { background:#9a7c2a; color:#fdf6e3; }
+    .spell-del { width:22px; height:22px; flex-shrink:0; background:transparent; border:1px solid rgba(122,21,21,0.4); border-radius:3px; color:#7a1515; font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+    .spell-del:hover { background:#7a1515; color:#fdf6e3; }
 </style>
 
 @code {
     [Parameter] public CharacterSheet Sheet { get; set; } = new();
 
-    // ── Estado de UI ─────────────────────────────────────────────
     private string ActiveTab = "Principal";
     private readonly string[] Tabs = { "Principal", "Magias", "Equipamentos" };
     private readonly int[] SlotCircles = { 1,2,3,4,5,6,7,8,9 };
 
-    // ── Modelos de dados locais ──────────────────────────────────
+    // ── Modelos ──────────────────────────────────────────────────
+
+    private class WeaponEntry
+    {
+        public string Nome        { get; set; } = "";
+        public string TesteAtaque { get; set; } = "";
+        public string Dano        { get; set; } = "";
+        public string Critico     { get; set; } = "";
+        public string TipoDano    { get; set; } = "";
+        public string Propriedades{ get; set; } = "";
+        public string Maestria    { get; set; } = "";
+        public string Alcance     { get; set; } = "";
+        public string Observacoes { get; set; } = "";
+        public bool   Expanded    { get; set; }
+    }
+
     private class SpellEntry
     {
         public int    Circulo      { get; set; }
@@ -1235,21 +747,23 @@
 
     private class ItemEntry
     {
-        public string Nome      { get; set; } = "";
-        public string Qtd       { get; set; } = "";
-        public string Efeito    { get; set; } = "";
-        public string Mecanica  { get; set; } = "";
-        public string Notas     { get; set; } = "";
-        public bool   Consumivel{ get; set; }
+        public string Nome       { get; set; } = "";
+        public string Qtd        { get; set; } = "";
+        public string Efeito     { get; set; } = "";
+        public string Mecanica   { get; set; } = "";
+        public string Notas      { get; set; } = "";
+        public bool   Consumivel { get; set; }
     }
 
-    private List<SpellEntry> Spells = new();
-    private List<ItemEntry>  Items  = new();
+    private List<WeaponEntry> Weapons = new();
+    private List<SpellEntry>  Spells  = new();
+    private List<ItemEntry>   Items   = new();
 
-    private void AddSpell() => Spells.Add(new SpellEntry());
-    private void AddItem()  => Items.Add(new ItemEntry());
+    private void AddWeapon() => Weapons.Add(new WeaponEntry());
+    private void AddSpell()  => Spells.Add(new SpellEntry());
+    private void AddItem()   => Items.Add(new ItemEntry());
 
-    // ── Definição dos atributos ──────────────────────────────────
+    // ── Atributos ────────────────────────────────────────────────
     private readonly (string Key, string Label)[] Attrs = {
         ("strength",     "Força"),
         ("dexterity",    "Destreza"),
@@ -1259,61 +773,46 @@
         ("charisma",     "Carisma"),
     };
 
-    // ── Definição das perícias ───────────────────────────────────
+    // ── Perícias ─────────────────────────────────────────────────
     private record SkillDef(string Key, string Label, string Attr, string AttrLabel);
     private readonly SkillDef[] Skills = {
-        new("acrobatics",    "Acrobacia",          "dexterity",    "Des"),
-        new("animal",        "Lidar c/ Animais",   "wisdom",       "Sab"),
-        new("arcana",        "Arcanismo",           "intelligence", "Int"),
-        new("athletics",     "Atletismo",           "strength",     "For"),
-        new("deception",     "Enganação",           "charisma",     "Car"),
-        new("history",       "História",            "intelligence", "Int"),
-        new("insight",       "Intuição",            "wisdom",       "Sab"),
-        new("intimidation",  "Intimidação",         "charisma",     "Car"),
-        new("investigation", "Investigação",        "intelligence", "Int"),
-        new("medicine",      "Medicina",            "wisdom",       "Sab"),
-        new("nature",        "Natureza",            "intelligence", "Int"),
-        new("perception",    "Percepção",           "wisdom",       "Sab"),
-        new("performance",   "Atuação",             "charisma",     "Car"),
-        new("persuasion",    "Persuasão",           "charisma",     "Car"),
-        new("religion",      "Religião",            "intelligence", "Int"),
-        new("sleight",       "Prestidigitação",     "dexterity",    "Des"),
-        new("stealth",       "Furtividade",         "dexterity",    "Des"),
-        new("survival",      "Sobrevivência",       "wisdom",       "Sab"),
+        new("acrobatics",    "Acrobacia",        "dexterity",    "Des"),
+        new("animal",        "Lidar c/ Animais", "wisdom",       "Sab"),
+        new("arcana",        "Arcanismo",         "intelligence", "Int"),
+        new("athletics",     "Atletismo",         "strength",     "For"),
+        new("deception",     "Enganação",         "charisma",     "Car"),
+        new("history",       "História",          "intelligence", "Int"),
+        new("insight",       "Intuição",          "wisdom",       "Sab"),
+        new("intimidation",  "Intimidação",       "charisma",     "Car"),
+        new("investigation", "Investigação",      "intelligence", "Int"),
+        new("medicine",      "Medicina",          "wisdom",       "Sab"),
+        new("nature",        "Natureza",          "intelligence", "Int"),
+        new("perception",    "Percepção",         "wisdom",       "Sab"),
+        new("performance",   "Atuação",           "charisma",     "Car"),
+        new("persuasion",    "Persuasão",         "charisma",     "Car"),
+        new("religion",      "Religião",          "intelligence", "Int"),
+        new("sleight",       "Prestidigitação",   "dexterity",    "Des"),
+        new("stealth",       "Furtividade",       "dexterity",    "Des"),
+        new("survival",      "Sobrevivência",     "wisdom",       "Sab"),
     };
 
-    // ── Helpers de acesso ao dicionário ─────────────────────────
-    private string V(string k) =>
-        Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+    // ── Helpers ──────────────────────────────────────────────────
+    private string V(string k)  => Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+    private int    I(string k)  => int.TryParse(V(k), out var n) ? n : 10;
+    private int    IZero(string k) => int.TryParse(V(k), out var n) ? n : 0;
+    private void   S(string k, object? v) => Sheet.Attributes[k] = v ?? "";
+    private bool   Bool(string k)   => V(k) == "true";
+    private void   Toggle(string k) => S(k, Bool(k) ? "false" : "true");
 
-    private int I(string k) =>
-        int.TryParse(V(k), out var n) ? n : 10;
-    private int ISlotSpell(string k) =>
-        int.TryParse(V(k), out var n) ? n : 4;
-    private int IZero(string k) =>
-        int.TryParse(V(k), out var n) ? n : 0;
-    private void S(string k, object? v) =>
-        Sheet.Attributes[k] = v ?? "";
-
-    private bool Bool(string k) =>
-        V(k) == "true";
-
-    private void Toggle(string k) =>
-        S(k, Bool(k) ? "false" : "true");
-
-    // Cicla: sem prof → proficiente → especialista → sem prof
     private void CycleProf(string sk)
     {
-        var prof   = Bool($"prof_{sk}");
-        var expert = Bool($"expert_{sk}");
-        if (!prof && !expert)   { S($"prof_{sk}", "true");  S($"expert_{sk}", "false"); }
-        else if (prof && !expert){ S($"prof_{sk}", "false"); S($"expert_{sk}", "true");  }
-        else                     { S($"prof_{sk}", "false"); S($"expert_{sk}", "false"); }
+        var prof = Bool($"prof_{sk}");
+        S($"prof_{sk}", prof ? "false" : "true");
+        S($"expert_{sk}", "false"); 
     }
 
-    // ── Cálculos de D&D ─────────────────────────────────────────
-    private static int Mod(int score) => (int)Math.Floor((score - 10) / 2.0);
-    private static string FMod(int m) => m >= 0 ? $"+{m}" : $"{m}";
+    private static int    Mod(int score) => (int)Math.Floor((score - 10) / 2.0);
+    private static string FMod(int m)    => m >= 0 ? $"+{m}" : $"{m}";
 
     private int SaveMod(string attrKey)
     {
@@ -1321,7 +820,7 @@
         return Bool($"save_{attrKey}") ? base_ + IZero("prof_bonus") : base_;
     }
 
-    // ── Propriedades de textarea (Blazor não suporta @bind + @onchange juntos) ──
+    // ── Textareas ────────────────────────────────────────────────
     private string CaracteristicasValue { get => V("caracteristicas"); set => S("caracteristicas", value); }
     private string TracosValue          { get => V("tracos");          set => S("tracos",           value); }
     private string TalentosValue        { get => V("talentos");        set => S("talentos",          value); }
