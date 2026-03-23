@@ -1,6 +1,6 @@
 @using RpgSheetHub.Models
 
-@* ── Abas de navegação ───────────────────────────────────────── *@
+@* Navigation tabs *@
 <div class="sheet-tabs">
     @foreach (var tab in Tabs)
     {
@@ -11,14 +11,12 @@
     }
 </div>
 
-@* ============================================================
-   ABA 1 — PRINCIPAL
-   ============================================================ *@
+@* Main *@
 @if (ActiveTab == "Principal")
 {
 <div class="dnd-sheet">
 
-    @* Cabeçalho *@
+    @* Header *@
     <div class="dnd-header">
         <div class="dnd-field dnd-name-field">
             <input type="text" @bind="Sheet.CharacterName" placeholder=" " />
@@ -52,7 +50,7 @@
 
     <div class="dnd-body">
 
-        @* ── Coluna Esquerda: Atributos + Salvaguardas ── *@
+        @* Left Column: Attributes + Safeguard *@
         <div class="dnd-col-left">
             <div class="dnd-row-2">
                 <div class="dnd-stat-box">
@@ -92,7 +90,7 @@
             </div>
         </div>
 
-        @* ── Coluna Central: Combate + HP + Perícias ── *@
+        @* Central Column: Combat + HP + Skills *@
         <div class="dnd-col-center">
             <div class="dnd-combat-row">
                 <div class="dnd-combat-box">
@@ -185,10 +183,10 @@
             </div>
         </div>
 
-        @* ── Coluna Direita: Armas + Características + Traços ── *@
+        @* Right Column: Weapons + Characteristics + Traits *@
         <div class="dnd-col-right">
 
-            @* ARMAS — sistema de cards igual às magias *@
+            @* Weapons *@
             <div class="dnd-section-box">
                 <div class="weapon-list-title">
                     <span>Armas</span>
@@ -201,8 +199,6 @@
                     var wp  = Weapons[idx];
 
                     <div class="weapon-card @(wp.Expanded ? "is-open" : "")">
-
-                        @* Linha compacta: nome | teste de ataque | dano | botão | deletar *@
                         <div class="weapon-card-top">
                             <input class="weapon-input-name" type="text"
                                    value="@wp.Nome"
@@ -226,7 +222,7 @@
                             <button class="spell-del-btn" @onclick='()=>Weapons.RemoveAt(idx)'>✕</button>
                         </div>
 
-                        @* Painel de detalhes *@
+                        @* Details *@
                         @if (wp.Expanded)
                         {
                             <div class="weapon-card-body">
@@ -312,9 +308,7 @@
 </div>
 }
 
-@* ============================================================
-   ABA 2 — MAGIAS
-   ============================================================ *@
+@* Spells *@
 @if (ActiveTab == "Magias")
 {
 <div class="dnd-sheet">
@@ -442,9 +436,7 @@
 </div>
 }
 
-@* ============================================================
-   ABA 3 — EQUIPAMENTOS
-   ============================================================ *@
+@* Equipment *@
 @if (ActiveTab == "Equipamentos")
 {
 <div class="dnd-sheet">
@@ -518,9 +510,7 @@
 </div>
 }
 
-@* ============================================================
-   CSS
-   ============================================================ *@
+@* CSS *@
 <style>
     .sheet-tabs { display:flex; gap:4px; margin-bottom:1rem; border-bottom:2px solid #c9a84c; }
     .sheet-tab {
@@ -603,7 +593,7 @@
     .dnd-textarea-grow { width:100%; border:none; background:transparent; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.9rem; resize:vertical; outline:none; min-height:70px; line-height:1.5; }
     .dnd-textarea-sm { width:100%; border:none; background:transparent; color:#1c1008; font-family:'Crimson Text',serif; font-size:0.88rem; resize:vertical; outline:none; min-height:50px; line-height:1.5; }
 
-    /* ── Armas ─────────────────────────────────────────── */
+    /* Weapons */
     .weapon-list-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
 
     .weapon-card { background:#fdf6e3; border:1px solid rgba(154,124,42,0.3); border-radius:6px; margin-bottom:5px; overflow:hidden; transition:border-color 0.15s; }
@@ -632,7 +622,7 @@
 
     .weapon-meta-grid { display:grid; grid-template-columns:1fr 1fr 2fr 1fr 1fr; gap:10px; margin-bottom:10px; }
 
-    /* ── Magias ─────────────────────────────────────────── */
+    /* Spells */
     .spell-header-box { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:0.75rem; padding-bottom:0.75rem; border-bottom:1px solid rgba(154,124,42,0.3); }
 
     .spell-slots-block { background:#fdf6e3; border:1px solid #9a7c2a; border-radius:6px; padding:8px 10px; margin-bottom:0.75rem; }
@@ -666,11 +656,11 @@
     .spell-flag { width:26px; height:26px; border:1.5px solid #9a7c2a; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:0.65rem; font-weight:700; cursor:pointer; color:#9a7c2a; user-select:none; transition:all 0.1s; }
     .spell-flag.on { background:#9a7c2a; color:#fdf6e3; }
 
-    /* Botão expandir — compartilhado entre armas e magias */
+    /* Expand Button */
     .spell-expand-btn { flex-shrink:0; font-family:'Cinzel',serif; font-size:0.6rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; background:transparent; border:1px solid #9a7c2a; border-radius:4px; color:#6b4c28; padding:4px 10px; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
     .spell-expand-btn:hover, .spell-card.is-open .spell-expand-btn, .weapon-card.is-open .spell-expand-btn { background:#9a7c2a; color:#fdf6e3; }
 
-    /* Botão deletar — compartilhado */
+    /* Delete Button */
     .spell-del-btn { flex-shrink:0; width:26px; height:26px; background:transparent; border:1px solid rgba(122,21,21,0.35); border-radius:4px; color:#7a1515; font-size:0.7rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
     .spell-del-btn:hover { background:#7a1515; color:#fdf6e3; }
 
@@ -686,11 +676,11 @@
     .spell-desc-area:focus { border-color:#9a7c2a; }
     .spell-empty { text-align:center; padding:2.5rem; font-family:'Crimson Text',serif; font-style:italic; color:#9a7c5a; font-size:1rem; line-height:1.8; }
 
-    /* Botão adicionar — compartilhado */
+    /* Add Button */
     .btn-add-spell { font-family:'Cinzel',serif; font-size:0.62rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; background:transparent; border:1px solid #9a7c2a; border-radius:4px; color:#6b4c28; padding:5px 14px; cursor:pointer; transition:all 0.15s; }
     .btn-add-spell:hover { background:#9a7c2a; color:#fdf6e3; }
 
-    /* ── Equipamentos ─────────────────────────────────── */
+    /* Equipment */
     .dnd-coins { display:flex; gap:8px; }
     .dnd-coin { flex:1; text-align:center; }
     .dnd-coin input { background:transparent; border:none; border-bottom:1px solid rgba(61,43,15,0.3); color:#1c1008; font-size:1.2rem; font-weight:bold; text-align:center; outline:none; width:100%; -moz-appearance:textfield; }
@@ -712,7 +702,7 @@
     private readonly string[] Tabs = { "Principal", "Magias", "Equipamentos" };
     private readonly int[] SlotCircles = { 1,2,3,4,5,6,7,8,9 };
 
-    // ── Modelos ──────────────────────────────────────────────────
+    // Models
 
     private class WeaponEntry
     {
@@ -763,7 +753,7 @@
     private void AddSpell()  => Spells.Add(new SpellEntry());
     private void AddItem()   => Items.Add(new ItemEntry());
 
-    // ── Atributos ────────────────────────────────────────────────
+    // Attributes
     private readonly (string Key, string Label)[] Attrs = {
         ("strength",     "Força"),
         ("dexterity",    "Destreza"),
@@ -773,7 +763,7 @@
         ("charisma",     "Carisma"),
     };
 
-    // ── Perícias ─────────────────────────────────────────────────
+    // Expertise
     private record SkillDef(string Key, string Label, string Attr, string AttrLabel);
     private readonly SkillDef[] Skills = {
         new("acrobatics",    "Acrobacia",        "dexterity",    "Des"),
@@ -796,7 +786,7 @@
         new("survival",      "Sobrevivência",     "wisdom",       "Sab"),
     };
 
-    // ── Helpers ──────────────────────────────────────────────────
+    // Helpers
     private string V(string k)  => Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
     private int    I(string k)  => int.TryParse(V(k), out var n) ? n : 10;
     private int    IZero(string k) => int.TryParse(V(k), out var n) ? n : 0;
@@ -820,7 +810,7 @@
         return Bool($"save_{attrKey}") ? base_ + IZero("prof_bonus") : base_;
     }
 
-    // ── Textareas ────────────────────────────────────────────────
+    // Text areas 
     private string CaracteristicasValue { get => V("caracteristicas"); set => S("caracteristicas", value); }
     private string TracosValue          { get => V("tracos");          set => S("tracos",           value); }
     private string TalentosValue        { get => V("talentos");        set => S("talentos",          value); }

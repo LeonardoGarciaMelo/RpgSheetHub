@@ -1,0 +1,112 @@
+﻿@page "/sheets"
+@inject ISheetStorageService Storage
+@inject TemplateService Templates
+@inject ThemeService Theme
+@inject NavigationManager NavManager
+
+<PageTitle>My Sheets - RPG Hub</PageTitle>
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div>
+        <h1 class="page-title">Minhas Fichas</h1>
+        <div class="title-ornament"><div class="title-ornament-diamond"></div></div>
+        <p class="page-subtitle">Seu grimório pessoal de heróis e vilões.</p>
+    </div>
+    <button class="btn-rpg btn-rpg-primary" @onclick="CreateNew">✦ Nova Ficha</button>
+</div>
+
+@if (_sheets == null)
+{
+    <p style="color: var(--c-text-2); font-style: italic;">Carregando os pergaminhos...</p>
+}
+else if (!_sheets.Any())
+{
+    <div class="card-dark" style="text-align: center; padding: 4rem 1rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🕸</div>
+        <h3 style="font-family: var(--font-display); color: var(--c-accent-bright);">Nenhum herói encontrado</h3>
+        <p style="color: var(--c-text-2); margin-bottom: 1.5rem;">Sua taverna está vazia. É hora de criar sua primeira lenda.</p>
+        <button class="btn-rpg btn-rpg-primary" @onclick="CreateNew">Criar Personagem</button>
+    </div>
+}
+else
+{
+    <div class="grid-3">
+        @foreach (var sheet in _sheets)
+        {
+            var system = Templates.GetAll().FirstOrDefault(t => t.Id == sheet.SystemTemplateId);
+            var systemName = system?.Name ?? "Sistema Desconhecido";
+            var badgeClass = GetBadgeClass(systemName);
+
+            <div class="card-dark" style="position: relative; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 1rem;">
+                    <span class="badge-system @badgeClass">@systemName</span>
+                </div>
+                
+                <h3 style="font-family: var(--font-display); color: var(--c-text); margin: 0 0 0.5rem; font-size: 1.3rem;">
+                    @(string.IsNullOrWhiteSpace(sheet.CharacterName) ? "Herói Sem Nome" : sheet.CharacterName)
+                </h3>
+                
+                <p style="color: var(--c-text-2); font-size: 0.9rem; margin: 0 0 1.5rem; flex-grow: 1;">
+                    @GetPrimaryInfo(sheet)
+                </p>
+
+                <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                    <button class="btn-rpg btn-rpg-primary" style="flex: 1; justify-content: center;" @onclick="() => OpenSheet(sheet.Id)">Abrir</button>
+                    <button class="btn-rpg btn-rpg-secondary" style="padding: 0.55rem 0.75rem;" @onclick="() => DeleteSheet(sheet.Id)" title="Excluir">🗙</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<CharacterSheet>? _sheets;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Theme.ResetThemeAsync();
+        await LoadSheetsAsync();
+    }
+
+    private async Task LoadSheetsAsync()
+    {
+        _sheets = await Storage.GetAllSheetsAsync();
+    }
+
+    private void CreateNew()
+    {
+        NavManager.NavigateTo("/sheets/new");
+    }
+
+    private void OpenSheet(Guid id)
+    {
+        NavManager.NavigateTo($"/sheets/edit/{id}");
+    }
+
+    private async Task DeleteSheet(Guid id)
+    {
+        await Storage.DeleteSheetAsync(id);
+        await LoadSheetsAsync();
+    }
+
+    private string GetPrimaryInfo(CharacterSheet sheet)
+    {
+        if (sheet.Attributes.TryGetValue("class", out var charClass) && !string.IsNullOrWhiteSpace(charClass?.ToString()))
+            return charClass.ToString()!;
+            
+        if (sheet.Attributes.TryGetValue("classe", out var classe) && !string.IsNullOrWhiteSpace(classe?.ToString()))
+            return classe.ToString()!;
+
+        return "Aventureiro Nível 1";
+    }
+
+    private string GetBadgeClass(string systemName)
+    {
+        if (systemName.Contains("D&D")) return "badge-dnd";
+        if (systemName.Contains("GURPS")) return "badge-gurps";
+        if (systemName.Contains("Tormenta")) return "badge-t20";
+        if (systemName.Contains("Ordem")) return "badge-op";
+        if (systemName.Contains("Pathfinder")) return "badge-pf";
+        return "";
+    }
+}

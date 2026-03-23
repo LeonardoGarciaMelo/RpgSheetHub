@@ -1,12 +1,11 @@
-@* ============================================================
-   SheetHeader.razor — Componente compartilhado entre sistemas
-   
-   Uso:
-   <SheetHeader Sheet="@Sheet" ExtraFields="@extraFields" />
-   
-   ExtraFields permite que cada sistema adicione campos extras
-   no cabeçalho além dos padrões (nome, nível, XP, jogador).
-   ============================================================ *@
+@* SheetHeader.razor — Component shared between systems
+
+Usage:
+
+<SheetHeader Sheet="@Sheet" ExtraFields="@extraFields" />
+
+ExtraFields allows each system to add extra fields
+to the header in addition to the defaults (name, level, XP, player).*@
 @using RpgSheetHub.Models
 
 <div class="dnd-header" style="grid-template-columns: @GridColumns">
@@ -27,7 +26,7 @@
         <label>XP</label>
     </div>
 
-    @* Campos extras definidos pelo sistema (classe, espécie, NEX, origem, etc.) *@
+    @* Additional fields defined by the system (class, species, NEX, origin, etc.) *@
     @foreach (var field in ExtraFields)
     {
         <div class="dnd-field @(field.Small ? "dnd-field-sm" : "")">
@@ -44,7 +43,6 @@
     [Parameter] public CharacterSheet Sheet        { get; set; } = new();
     [Parameter] public List<HeaderField> ExtraFields { get; set; } = new();
 
-    // Calcula as colunas do grid dinamicamente
     private string GridColumns =>
         $"2fr 1fr 1fr 80px 80px{string.Concat(Enumerable.Repeat(" 1fr", ExtraFields.Count(f => !f.Small)))}";
 
@@ -54,9 +52,10 @@
     private void S(string k, object? v) =>
         Sheet.Attributes[k] = v ?? "";
 
+    
     /// <summary>
-    /// Define um campo extra no cabeçalho.
-    /// Cada sistema instancia os que precisa.
+    /// Defines an extra field in the header.
+    /// Each system instantiates the ones it needs.
     /// </summary>
     public record HeaderField(string Key, string Label, string InputType = "text", bool Small = false);
 }
