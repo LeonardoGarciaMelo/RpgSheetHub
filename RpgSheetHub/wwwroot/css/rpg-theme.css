@@ -69,25 +69,37 @@
     }
 
 /* TEMA ORDEM PARANORMAL*/
-*, *::before, *::after {
-    box-sizing: border-box;
+.theme-op {
+    --c-bg: #080810;
+    --c-bg-2: #0f0f1a;
+    --c-bg-3: #161625;
+    --c-surface: #1a1a2e;
+    --c-border: rgba(106,63,160,0.2);
+    --c-border-accent: #6a3fa0;
+    --c-text: #d0c0e8;
+    --c-text-2: #8060b0;
+    --c-text-3: #4a2870;
+    --c-accent: #6a3fa0;
+    --c-accent-bright: #a060e0;
+    --c-accent-dim: rgba(106,63,160,0.15);
+    --sidebar-bg: linear-gradient(180deg, #0e0818 0%, #06060f 100%);
+    --sidebar-border: #4a2070;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: var(--font-body);
-    font-size: 17px;
-    line-height: 1.7;
-    color: var(--c-text);
-    background-color: var(--c-bg);
-    transition: background-color 0.3s ease, color 0.3s ease;
+/* Background com névoa paranormal */
+body.theme-op {
+    background-image: radial-gradient(ellipse at 30% 20%, rgba(106,63,160,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(80,0,120,0.05) 0%, transparent 60%), linear-gradient(160deg, #080810 0%, #06060c 60%, #040408 100%) !important;
 }
 
-body {
-    background-image: radial-gradient(ellipse at 20% 0%, rgba(123,124,232,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(123,124,232,0.03) 0%, transparent 60%);
-}
+    /* Scrollbar roxa */
+    body.theme-op ::-webkit-scrollbar-thumb {
+        background: #6a3fa0;
+    }
+
+        body.theme-op ::-webkit-scrollbar-thumb:hover {
+            background: #a060e0;
+        }
+
 
 /*  LAYOUT */
 .page {

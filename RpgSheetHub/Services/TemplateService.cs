@@ -4,20 +4,15 @@ namespace RpgSheetHub.Services
 {
     /// <summary>
     /// Service responsible for providing the RPG system templates.
-    /// Acts as an in-memory repository until a real database is implemented.
+    /// reads from a professional JSON static database.
     /// </summary>
     public class TemplateService
     {
         private readonly List<SystemTemplate> _templates;
 
-        public TemplateService()
+        public TemplateService(List<SystemTemplate> templates)
         {
-            // Initializes with some base systems so we can test dynamic generation
-            _templates = new List<SystemTemplate>
-            {
-                CreateDnDTemplate(),
-                CreateOrdemParanormalTemplate()
-            };
+            _templates = templates ?? new List<SystemTemplate>();
         }
 
         /// <summary>
@@ -30,45 +25,17 @@ namespace RpgSheetHub.Services
         /// </summary>
         public SystemTemplate? GetBySlug(string slug)
         {
+            if (string.IsNullOrEmpty(slug)) return null;
+
             return slug.ToLower() switch
             {
-                "dnd55" => _templates.FirstOrDefault(t => t.Name.Contains("D&D")),
-                "op" => _templates.FirstOrDefault(t => t.Name.Contains("Ordem")),
+                "dnd55" => _templates.FirstOrDefault(t => t.Name.Contains("D&D 5.5")),
+                "dnd35" => _templates.FirstOrDefault(t => t.Name.Contains("D&D 3.5")),
+                "op" or "ordemparanormal" => _templates.FirstOrDefault(t => t.Name.Contains("Ordem")),
+                "gurps" => _templates.FirstOrDefault(t => t.Name.Contains("GURPS")),
+                "t20" => _templates.FirstOrDefault(t => t.Name.Contains("Tormenta")),
+                "pathfinder" or "pf" => _templates.FirstOrDefault(t => t.Name.Contains("Pathfinder")),
                 _ => null
-            };
-        }
-
-        private SystemTemplate CreateDnDTemplate()
-        {
-            return new SystemTemplate
-            {
-                Name = "D&D 5.5e",
-                Fields = new List<FieldDefinition>
-                {
-                    new() { Key = "class", Label = "Class & Level", Category = "Header", InputType = "text" },
-                    new() { Key = "race", Label = "Species/Race", Category = "Header", InputType = "text" },
-                    new() { Key = "ac", Label = "Armor Class", Category = "Combat", InputType = "number" },
-                    new() { Key = "max_hp", Label = "Max Hit Points", Category = "Combat", InputType = "number" },
-                    new() { Key = "strength", Label = "Strength", Category = "Attributes", InputType = "number" },
-                    new() { Key = "dexterity", Label = "Dexterity", Category = "Attributes", InputType = "number" }
-                }
-            };
-        }
-
-        private SystemTemplate CreateOrdemParanormalTemplate()
-        {
-            return new SystemTemplate
-            {
-                Name = "Ordem Paranormal",
-                Fields = new List<FieldDefinition>
-                {
-                    new() { Key = "origin", Label = "Origin", Category = "Header", InputType = "text" },
-                    new() { Key = "class", Label = "Class", Category = "Header", InputType = "text" },
-                    new() { Key = "nex", Label = "NEX (%)", Category = "Header", InputType = "number" },
-                    new() { Key = "hp", Label = "Hit Points", Category = "Status", InputType = "number" },
-                    new() { Key = "sanity", Label = "Sanity", Category = "Status", InputType = "number" },
-                    new() { Key = "agility", Label = "Agility", Category = "Attributes", InputType = "number" }
-                }
             };
         }
     }

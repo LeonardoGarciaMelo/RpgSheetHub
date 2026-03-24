@@ -1,0 +1,921 @@
+@using RpgSheetHub.Models
+
+@* ── Abas ─────────────────────────────────────────────────────── *@
+<div class="op-tabs">
+    @foreach (var tab in Tabs)
+    {
+        <button class="op-tab @(ActiveTab == tab ? "active" : "")"
+                @onclick="() => ActiveTab = tab">
+            @tab
+        </button>
+    }
+</div>
+
+@* ============================================================
+   ABA 1 — PRINCIPAL
+   ============================================================ *@
+@if (ActiveTab == "Principal")
+{
+<div class="op-sheet">
+
+    @* Cabeçalho *@
+    <div class="op-header">
+        <div class="op-field op-field-lg">
+            <input type="text" @bind="Sheet.CharacterName" placeholder=" " />
+            <label>Personagem</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("jogador")" @onchange='e=>S("jogador",e.Value)' placeholder=" " />
+            <label>Jogador(a)</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("origem")" @onchange='e=>S("origem",e.Value)' placeholder=" " />
+            <label>Origem</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("classe")" @onchange='e=>S("classe",e.Value)' placeholder=" " />
+            <label>Classe</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("elemento")" @onchange='e=>S("elemento",e.Value)' placeholder=" " />
+            <label>Elemento</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("trilha")" @onchange='e=>S("trilha",e.Value)' placeholder=" " />
+            <label>Trilha</label>
+        </div>
+        <div class="op-field op-field-lg">
+            <input type="text" value="@V("patente")" @onchange='e=>S("patente",e.Value)' placeholder="Recruta" />
+            <label>Patente</label>
+        </div>
+        <div class="op-field op-field-sm">
+            <input type="text" value="@V("nex")" @onchange='e=>S("nex",e.Value)' placeholder="5%" />
+            <label>NEX</label>
+        </div>
+        <div class="op-field op-field-sm">
+            <input type="number" value="@V("xp")" @onchange='e=>S("xp",e.Value)' placeholder="0" />
+            <label>XP</label>
+        </div>
+        <div class="op-field op-field-sm">
+            <input type="number" value="@V("pm")" @onchange='e=>S("pm",e.Value)' placeholder="0" />
+            <label>PM</label>
+        </div>
+    </div>
+
+    @* Corpo: atributos | status+combate | perícias *@
+    <div class="op-body">
+
+        @* ── Coluna Esquerda: Atributos ── *@
+        <div class="op-col-attrs">
+            <div class="op-attrs-title">Atributos</div>
+            <div class="op-attrs-grid">
+                @foreach (var attr in Attrs)
+                {
+                    var val = IZero(attr.Key);
+                    <div class="op-attr-hex">
+                        <div class="op-attr-key">@attr.Short</div>
+                        <input type="number" class="op-attr-val"
+                               value="@val"
+                               @onchange='e=>S(attr.Key, e.Value)'
+                               min="-5" max="20" />
+                        <div class="op-attr-label">@attr.Label</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ── Coluna Central: Status + Defesa + Ataques ── *@
+        <div class="op-col-center">
+
+            @* Status vital *@
+            <div class="op-status-grid">
+                <div class="op-status-box op-pv">
+                    <label class="op-status-label">PV — Pontos de Vida</label>
+                    <div class="op-status-row">
+                        <input type="number" value="@V("pv_atual")" @onchange='e=>S("pv_atual",e.Value)' placeholder="0" />
+                        <span class="op-status-sep">/</span>
+                        <input type="number" value="@V("pv_max")" @onchange='e=>S("pv_max",e.Value)' placeholder="0" />
+                    </div>
+                    <div class="op-status-hint">atual / máximo</div>
+                </div>
+                <div class="op-status-box op-pe">
+                    <label class="op-status-label">PE — Pontos de Esforço</label>
+                    <div class="op-status-row">
+                        <input type="number" value="@V("pe_atual")" @onchange='e=>S("pe_atual",e.Value)' placeholder="0" />
+                        <span class="op-status-sep">/</span>
+                        <input type="number" value="@V("pe_max")" @onchange='e=>S("pe_max",e.Value)' placeholder="0" />
+                    </div>
+                    <div class="op-status-hint">atual / máximo</div>
+                </div>
+                <div class="op-status-box op-san">
+                    <label class="op-status-label">SAN — Sanidade</label>
+                    <div class="op-status-row">
+                        <input type="number" value="@V("san_atual")" @onchange='e=>S("san_atual",e.Value)' placeholder="0" />
+                        <span class="op-status-sep">/</span>
+                        <input type="number" value="@V("san_max")" @onchange='e=>S("san_max",e.Value)' placeholder="0" />
+                    </div>
+                    <div class="op-status-hint">atual / máximo</div>
+                </div>
+            </div>
+
+            @* Defesa + Deslocamento + PE/Rodada *@
+            <div class="op-combat-grid">
+                <div class="op-combat-box">
+                    <div class="op-combat-formula">
+                        10 + @FVal("agi") (AGI) + 
+                        <input type="number" class="op-inline-input"
+                               value="@V("defesa_equip")" @onchange='e=>S("defesa_equip",e.Value)'
+                               placeholder="0" title="Equipamento" />
+                        +
+                        <input type="number" class="op-inline-input"
+                               value="@V("defesa_outros")" @onchange='e=>S("defesa_outros",e.Value)'
+                               placeholder="0" title="Outros" />
+                        = <strong>@Defesa()</strong>
+                    </div>
+                    <label>Defesa</label>
+                </div>
+                <div class="op-combat-box">
+                    <input type="number" value="@V("deslocamento")" @onchange='e=>S("deslocamento",e.Value)' />
+                    <label>Deslocamento (m)</label>
+                </div>
+                <div class="op-combat-box">
+                    <input type="number" value="@V("pe_rodada")" @onchange='e=>S("pe_rodada",e.Value)' />
+                    <label>PE / Rodada</label>
+                </div>
+            </div>
+
+            @* Proteção e Resistências *@
+            <div class="op-resist-box">
+                <div class="op-resist-row">
+                    <label>Proteção</label>
+                    <input type="text" value="@V("protecao")" @onchange='e=>S("protecao",e.Value)'
+                           placeholder="Ex: Proteção Leve 3" />
+                </div>
+                <div class="op-resist-row">
+                    <label>Resistências</label>
+                    <input type="text" value="@V("resistencias")" @onchange='e=>S("resistencias",e.Value)'
+                           placeholder="Ex: Balística 2, Fogo 3" />
+                </div>
+            </div>
+
+            @* Ataques *@
+            <div class="op-attacks-box">
+                <div class="op-section-title">Ataques</div>
+                <div class="op-attacks-header">
+                    <span style="flex:2">Arma</span>
+                    <span style="flex:1">Teste</span>
+                    <span style="flex:1">Dano</span>
+                    <span style="flex:2">Crítico / Alcance / Especial</span>
+                    <span style="width:26px"></span>
+                </div>
+                @for (int i = 0; i < Attacks.Count; i++)
+                {
+                    var idx = i;
+                    var atk = Attacks[idx];
+                    <div class="op-attack-row">
+                        <input style="flex:2" type="text" value="@atk.Arma"    @onchange='e=>atk.Arma=e.Value?.ToString()??""'    placeholder="Adaga" />
+                        <input style="flex:1" type="text" value="@atk.Teste"   @onchange='e=>atk.Teste=e.Value?.ToString()??""'   placeholder="3d20" />
+                        <input style="flex:1" type="text" value="@atk.Dano"    @onchange='e=>atk.Dano=e.Value?.ToString()??""'    placeholder="1d4" />
+                        <input style="flex:2" type="text" value="@atk.Especial" @onchange='e=>atk.Especial=e.Value?.ToString()??""' placeholder="19/×2 Curto Discreta" />
+                        <button class="op-del-btn" @onclick='()=>Attacks.RemoveAt(idx)'>✕</button>
+                    </div>
+                }
+                <button class="op-add-btn" @onclick="()=>Attacks.Add(new AttackEntry())">+ Ataque</button>
+            </div>
+
+        </div>
+
+        @* ── Coluna Direita: Perícias ── *@
+        <div class="op-col-skills">
+            <div class="op-section-title">Perícias</div>
+            <div class="op-skills-header">
+                <span class="sk-name">Perícia</span>
+                <span class="sk-attr">Attr</span>
+                <span class="sk-treino">Treino</span>
+                <span class="sk-outros">Outros</span>
+                <span class="sk-total">Total</span>
+            </div>
+            @foreach (var sk in Skills)
+            {
+                var attrVal = IZero(sk.Attr);
+                var treino  = IZero($"sk_treino_{sk.Key}");
+                var outros  = IZero($"sk_outros_{sk.Key}");
+                var total   = attrVal + treino + outros;
+                <div class="op-skill-row">
+                    <span class="sk-name @(sk.SomenteTreinada ? "sk-trained-only" : "")">
+                        @sk.Label@(sk.SomenteTreinada ? "*" : "")
+                    </span>
+                    <span class="sk-attr">@sk.AttrLabel</span>
+                    <input class="sk-treino" type="number"
+                           value="@treino"
+                           @onchange='e=>S($"sk_treino_{sk.Key}",e.Value)'
+                           min="0" />
+                    <input class="sk-outros" type="number"
+                           value="@outros"
+                           @onchange='e=>S($"sk_outros_{sk.Key}",e.Value)' />
+                    <span class="sk-total @(total > 0 ? "sk-positive" : "")">@FVal(total)</span>
+                </div>
+            }
+            <div class="op-skills-hint">* Somente treinada</div>
+        </div>
+
+    </div>
+</div>
+}
+
+@* ============================================================
+   ABA 2 — HABILIDADES & RITUAIS
+   ============================================================ *@
+@if (ActiveTab == "Habilidades & Rituais")
+{
+<div class="op-sheet">
+
+    <div class="op-hab-header">
+        <div class="op-field">
+            <input type="text" value="@V("ritual_atributo")" @onchange='e=>S("ritual_atributo",e.Value)' placeholder="Presença" />
+            <label>Atributo-Chave de Rituais</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("ritual_mod")" @onchange='e=>S("ritual_mod",e.Value)' />
+            <label>Mod. do Atributo</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("ritual_dt")" @onchange='e=>S("ritual_dt",e.Value)' />
+            <label>DT de Rituais</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("ritual_teste_resist")" @onchange='e=>S("ritual_teste_resist",e.Value)' />
+            <label>Teste de Resistência</label>
+        </div>
+    </div>
+
+    @* Habilidades *@
+    <div class="op-section-title" style="margin-bottom:8px;">Habilidades</div>
+    <div class="op-hab-table-header">
+        <span style="flex:2">Habilidade</span>
+        <span style="flex:0.5">Custo</span>
+        <span style="flex:0.5">Página</span>
+        <span style="flex:3">Descritivo</span>
+        <span style="width:26px"></span>
+    </div>
+    @for (int i = 0; i < Habilities.Count; i++)
+    {
+        var idx = i;
+        var hab = Habilities[idx];
+        <div class="op-hab-row">
+            <input style="flex:2"   type="text" value="@hab.Nome"      @onchange='e=>hab.Nome=e.Value?.ToString()??""'      placeholder="Nome..." />
+            <input style="flex:0.5" type="text" value="@hab.Custo"     @onchange='e=>hab.Custo=e.Value?.ToString()??""'     placeholder="1PE" />
+            <input style="flex:0.5" type="text" value="@hab.Pagina"    @onchange='e=>hab.Pagina=e.Value?.ToString()??""'    placeholder="42" />
+            <input style="flex:3"   type="text" value="@hab.Descritivo" @onchange='e=>hab.Descritivo=e.Value?.ToString()??""' placeholder="Descrição..." />
+            <button class="op-del-btn" @onclick='()=>Habilities.RemoveAt(idx)'>✕</button>
+        </div>
+    }
+    <button class="op-add-btn" @onclick="()=>Habilities.Add(new HabilityEntry())">+ Habilidade</button>
+
+    <div style="height:1rem;"></div>
+
+    @* Rituais *@
+    <div class="op-section-title" style="margin-bottom:8px;">Rituais Conhecidos</div>
+    <div class="op-ritual-table-header">
+        <span style="flex:2">Ritual</span>
+        <span style="flex:1">Elemento</span>
+        <span style="flex:1">Execução</span>
+        <span style="flex:1">Alcance</span>
+        <span style="flex:1">Área</span>
+        <span style="flex:1">Duração</span>
+        <span style="flex:1">Resistência</span>
+        <span style="flex:2">Efeito</span>
+        <span style="width:26px"></span>
+    </div>
+    @for (int i = 0; i < Rituals.Count; i++)
+    {
+        var idx = i;
+        var rit = Rituals[idx];
+        <div class="op-ritual-row @(rit.Expanded ? "is-open" : "")">
+            <div class="op-ritual-main">
+                <input style="flex:2" type="text" value="@rit.Nome"       @onchange='e=>rit.Nome=e.Value?.ToString()??""'       placeholder="Nome do ritual" />
+                <input style="flex:1" type="text" value="@rit.Elemento"   @onchange='e=>rit.Elemento=e.Value?.ToString()??""'   placeholder="Morte" />
+                <input style="flex:1" type="text" value="@rit.Execucao"   @onchange='e=>rit.Execucao=e.Value?.ToString()??""'   placeholder="1 ação" />
+                <input style="flex:1" type="text" value="@rit.Alcance"    @onchange='e=>rit.Alcance=e.Value?.ToString()??""'    placeholder="Curto" />
+                <input style="flex:1" type="text" value="@rit.Area"       @onchange='e=>rit.Area=e.Value?.ToString()??""'       placeholder="—" />
+                <input style="flex:1" type="text" value="@rit.Duracao"    @onchange='e=>rit.Duracao=e.Value?.ToString()??""'    placeholder="Cena" />
+                <input style="flex:1" type="text" value="@rit.Resistencia" @onchange='e=>rit.Resistencia=e.Value?.ToString()??""' placeholder="Vontade" />
+                <input style="flex:2" type="text" value="@rit.Efeito"     @onchange='e=>rit.Efeito=e.Value?.ToString()??""'     placeholder="Resumo..." />
+                <button class="spell-expand-btn" style="flex-shrink:0;" @onclick="()=>rit.Expanded=!rit.Expanded">
+                    @(rit.Expanded ? "▲" : "▼")
+                </button>
+                <button class="op-del-btn" @onclick='()=>Rituals.RemoveAt(idx)'>✕</button>
+            </div>
+            @if (rit.Expanded)
+            {
+                <div class="op-ritual-body">
+                    <label class="op-ritual-desc-label">Descrição Completa</label>
+                    <textarea class="op-ritual-desc"
+                              @bind="rit.Descricao" @bind:event="oninput" rows="4"
+                              placeholder="Cole aqui a descrição completa do ritual..."></textarea>
+                </div>
+            }
+        </div>
+    }
+    <button class="op-add-btn" @onclick="()=>Rituals.Add(new RitualEntry())">+ Ritual</button>
+
+</div>
+}
+
+@* ============================================================
+   ABA 3 — INVENTÁRIO
+   ============================================================ *@
+@if (ActiveTab == "Inventário")
+{
+<div class="op-sheet">
+
+    @* Meta do inventário *@
+    <div class="op-inv-meta">
+        <div class="op-field">
+            <input type="text" value="@V("patente_inv")" @onchange='e=>S("patente_inv",e.Value)' placeholder="Recruta" />
+            <label>Patente</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("pontos_prestigio")" @onchange='e=>S("pontos_prestigio",e.Value)' />
+            <label>Pontos de Prestígio</label>
+        </div>
+        <div class="op-field">
+            <input type="text" value="@V("limite_credito")" @onchange='e=>S("limite_credito",e.Value)' placeholder="—" />
+            <label>Limite de Crédito</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("carga_max")" @onchange='e=>S("carga_max",e.Value)' />
+            <label>Carga Máx.</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("carga_atual")" @onchange='e=>S("carga_atual",e.Value)' />
+            <label>Carga Atual</label>
+        </div>
+    </div>
+
+    @* Limite de itens por tier *@
+    <div class="op-tier-box">
+        <label class="op-section-title" style="margin-bottom:6px;">Limite de Itens por Tier</label>
+        <div class="op-tier-grid">
+            @foreach (var tier in new[]{("I","tier_i"),("II","tier_ii"),("III","tier_iii"),("IV","tier_iv")})
+            {
+                <div class="op-tier-cell">
+                    <div class="op-tier-label">Tier @tier.Item1</div>
+                    <input type="number" value="@V(tier.Item2)" @onchange='e=>S(tier.Item2,e.Value)' min="0" />
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Lista de itens *@
+    <div class="op-section-title" style="margin:10px 0 6px;">Itens</div>
+    <div class="op-inv-header">
+        <span style="flex:3">Item</span>
+        <span style="flex:1">Categoria</span>
+        <span style="flex:0.5">Espaços</span>
+        <span style="width:26px"></span>
+    </div>
+    @for (int i = 0; i < InvItems.Count; i++)
+    {
+        var idx = i;
+        var it  = InvItems[idx];
+        <div class="op-inv-row">
+            <input style="flex:3"   type="text" value="@it.Nome"      @onchange='e=>it.Nome=e.Value?.ToString()??""'      placeholder="Nome do item..." />
+            <input style="flex:1"   type="text" value="@it.Categoria" @onchange='e=>it.Categoria=e.Value?.ToString()??""' placeholder="Arma, Proteção..." />
+            <input style="flex:0.5" type="number" value="@it.Espacos" @onchange='e=>it.Espacos=e.Value?.ToString()??""'  placeholder="1" />
+            <button class="op-del-btn" @onclick='()=>InvItems.RemoveAt(idx)'>✕</button>
+        </div>
+    }
+    <button class="op-add-btn" @onclick="()=>InvItems.Add(new InvItemEntry())">+ Item</button>
+
+</div>
+}
+
+@* ============================================================
+   ABA 4 — DESCRIÇÃO
+   ============================================================ *@
+@if (ActiveTab == "Descrição")
+{
+<div class="op-sheet">
+    <div class="op-desc-grid">
+        <div class="op-desc-box">
+            <label class="op-section-title">Aparência</label>
+            <textarea @bind="AparenciaValue" @bind:event="oninput"
+                      placeholder="Descreva a aparência física do personagem..."></textarea>
+        </div>
+        <div class="op-desc-box">
+            <label class="op-section-title">Personalidade</label>
+            <textarea @bind="PersonalidadeValue" @bind:event="oninput"
+                      placeholder="Como o personagem age, seus trejeitos, medos..."></textarea>
+        </div>
+        <div class="op-desc-box" style="grid-column: span 2;">
+            <label class="op-section-title">Histórico</label>
+            <textarea @bind="HistoricoValue" @bind:event="oninput" style="min-height:140px;"
+                      placeholder="Background, como chegou à Ordem, eventos marcantes..."></textarea>
+        </div>
+        <div class="op-desc-box">
+            <label class="op-section-title">Objetivo</label>
+            <textarea @bind="ObjetivoValue" @bind:event="oninput"
+                      placeholder="O que o agente busca, sua motivação..."></textarea>
+        </div>
+        <div class="op-desc-box">
+            <label class="op-section-title">Anotações</label>
+            <textarea @bind="AnotacoesValue" @bind:event="oninput"
+                      placeholder="Notas livres, progressão, relacionamentos..."></textarea>
+        </div>
+    </div>
+</div>
+}
+
+@* ============================================================
+   ABA 5 — MISSÕES
+   ============================================================ *@
+@if (ActiveTab == "Missões")
+{
+<div class="op-sheet">
+
+    <div class="op-missions-meta">
+        <div class="op-field">
+            <input type="number" value="@V("pontos_prestigio_miss")" @onchange='e=>S("pontos_prestigio_miss",e.Value)' />
+            <label>Pontos de Prestígio</label>
+        </div>
+        <div class="op-field">
+            <input type="number" value="@V("num_missoes")" @onchange='e=>S("num_missoes",e.Value)' />
+            <label>Nº de Missões</label>
+        </div>
+    </div>
+
+    <div class="op-section-title" style="margin-bottom:8px;">Lista de Missões</div>
+    @for (int i = 0; i < Missions.Count; i++)
+    {
+        var idx = i;
+        var mis = Missions[idx];
+        <div class="op-mission-card @(mis.Expanded ? "is-open" : "")">
+            <div class="op-mission-top">
+                <span class="op-mission-num">@(idx + 1).)</span>
+                <input class="op-mission-title-input" type="text"
+                       value="@mis.Titulo"
+                       @onchange='e=>mis.Titulo=e.Value?.ToString()??""'
+                       placeholder="Título da missão" />
+                <input class="op-mission-meta-input" type="text"
+                       value="@mis.Recompensas"
+                       @onchange='e=>mis.Recompensas=e.Value?.ToString()??""'
+                       placeholder="NEX / XP / PM / PP ganhos" />
+                <button class="spell-expand-btn" @onclick="()=>mis.Expanded=!mis.Expanded">
+                    @(mis.Expanded ? "▲ Recolher" : "▼ Ações")
+                </button>
+                <button class="op-del-btn" @onclick='()=>Missions.RemoveAt(idx)'>✕</button>
+            </div>
+            @if (mis.Expanded)
+            {
+                <div class="op-mission-body">
+                    <label>Ações realizadas</label>
+                    <textarea @bind="mis.Acoes" @bind:event="oninput" rows="4"
+                              placeholder="Descreva as ações tomadas nesta missão..."></textarea>
+                </div>
+            }
+        </div>
+    }
+    <button class="op-add-btn" @onclick="()=>Missions.Add(new MissionEntry())">+ Missão</button>
+
+    <div style="height:1.5rem;"></div>
+    <div class="op-section-title" style="margin-bottom:8px;">Tempo entre Missões</div>
+    <div class="op-field" style="max-width:120px; margin-bottom:1rem;">
+        <input type="number" value="@V("tempo_missoes_num")" @onchange='e=>S("tempo_missoes_num",e.Value)' />
+        <label>Número</label>
+    </div>
+    @for (int i = 0; i < DowntimeActions.Count; i++)
+    {
+        var idx = i;
+        var dt  = DowntimeActions[idx];
+        <div class="op-downtime-row">
+            <span class="op-downtime-num">@(idx+1).</span>
+            <input style="flex:1" type="text" value="@dt.Acao"      @onchange='e=>dt.Acao=e.Value?.ToString()??""'      placeholder="Ação..." />
+            <input style="flex:1" type="text" value="@dt.Descricao" @onchange='e=>dt.Descricao=e.Value?.ToString()??""' placeholder="Descrição / Número..." />
+            <button class="op-del-btn" @onclick='()=>DowntimeActions.RemoveAt(idx)'>✕</button>
+        </div>
+    }
+    <button class="op-add-btn" @onclick="()=>DowntimeActions.Add(new DowntimeEntry())">+ Ação</button>
+
+</div>
+}
+
+@* ============================================================
+   CSS
+   ============================================================ *@
+<style>
+    /* ── Abas ─────────────────────────────────────────── */
+    .op-tabs { display:flex; gap:4px; margin-bottom:1rem; border-bottom:2px solid #6a3fa0; }
+    .op-tab {
+        font-family:'Cinzel',serif; font-size:0.68rem; font-weight:600;
+        letter-spacing:0.08em; text-transform:uppercase;
+        padding:0.45rem 1rem; background:transparent;
+        border:1px solid #4a2070; border-bottom:none;
+        border-radius:4px 4px 0 0; color:#8060b0; cursor:pointer; transition:all 0.15s;
+    }
+    .op-tab.active, .op-tab:hover { background:#4a2070; color:#d8c0f0; }
+
+    /* ── Folha base ───────────────────────────────────── */
+    .op-sheet {
+        background:#0e0a14;
+        border:1px solid #4a2070;
+        border-radius:0 8px 8px 8px;
+        padding:1rem;
+        color:#d0c0e8;
+        font-family:'Crimson Text',serif;
+        box-shadow:0 4px 24px rgba(80,0,120,0.3);
+    }
+
+    /* ── Campos de header ─────────────────────────────── */
+    .op-header {
+        display:grid;
+        grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr 80px 80px 80px;
+        gap:6px;
+        margin-bottom:0.75rem;
+    }
+    .op-field {
+        display:flex; flex-direction:column-reverse;
+        border:1px solid #4a2070; border-radius:4px;
+        background:#160e24; padding:4px 6px 2px;
+    }
+    .op-field input {
+        background:transparent; border:none;
+        border-bottom:1px solid rgba(106,63,160,0.4);
+        color:#d0c0e8; font-family:'Crimson Text',serif;
+        font-size:1rem; outline:none; width:100%;
+    }
+    .op-field label {
+        font-family:'Cinzel',serif; font-size:0.52rem; font-weight:600;
+        text-transform:uppercase; color:#6a3fa0; letter-spacing:0.05em;
+    }
+    .op-field-sm { }
+    .op-field-lg { }
+
+    /* ── Corpo ────────────────────────────────────────── */
+    .op-body {
+        display:grid;
+        grid-template-columns:160px 1fr 220px;
+        gap:12px;
+        align-items:start;
+    }
+
+    /* ── Atributos ────────────────────────────────────── */
+    .op-col-attrs { display:flex; flex-direction:column; gap:6px; }
+    .op-attrs-title {
+        font-family:'Cinzel',serif; font-size:0.62rem; font-weight:700;
+        text-transform:uppercase; color:#8060b0; letter-spacing:0.1em;
+        text-align:center; border-bottom:1px solid #4a2070; padding-bottom:4px; margin-bottom:4px;
+    }
+    .op-attrs-grid { display:flex; flex-direction:column; gap:8px; }
+
+    .op-attr-hex {
+        background:#160e24; border:1px solid #4a2070;
+        border-radius:8px; padding:6px 4px; text-align:center;
+        transition:border-color 0.15s;
+    }
+    .op-attr-hex:hover { border-color:#7040c0; }
+    .op-attr-key {
+        font-family:'Cinzel',serif; font-size:0.9rem; font-weight:700;
+        color:#a060e0; letter-spacing:0.08em;
+    }
+    .op-attr-val {
+        font-size:2rem; font-weight:bold; text-align:center;
+        background:transparent; border:none; outline:none;
+        color:#d0c0e8; width:100%; -moz-appearance:textfield;
+    }
+    .op-attr-val::-webkit-inner-spin-button,
+    .op-attr-val::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .op-attr-label {
+        font-family:'Cinzel',serif; font-size:0.5rem;
+        color:#6a3fa0; text-transform:uppercase; letter-spacing:0.06em;
+    }
+
+    /* ── Status PV/PE/SAN ─────────────────────────────── */
+    .op-col-center { display:flex; flex-direction:column; gap:10px; }
+    .op-status-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .op-status-box {
+        background:#160e24; border:1px solid #4a2070;
+        border-radius:6px; padding:8px; text-align:center;
+    }
+    .op-pv  { border-color:#7a1515; }
+    .op-pe  { border-color:#4a2070; }
+    .op-san { border-color:#0d5050; }
+    .op-status-label {
+        font-family:'Cinzel',serif; font-size:0.52rem; font-weight:700;
+        text-transform:uppercase; color:#8060b0; letter-spacing:0.06em;
+        display:block; margin-bottom:4px;
+    }
+    .op-pv  .op-status-label { color:#c04040; }
+    .op-san .op-status-label { color:#20a0a0; }
+    .op-status-row { display:flex; align-items:center; justify-content:center; gap:4px; }
+    .op-status-row input {
+        width:54px; background:transparent; border:none;
+        border-bottom:1px solid rgba(106,63,160,0.5);
+        color:#d0c0e8; font-size:1.6rem; font-weight:bold;
+        text-align:center; outline:none; -moz-appearance:textfield;
+    }
+    .op-pv  .op-status-row input { border-bottom-color:rgba(192,64,64,0.5); }
+    .op-san .op-status-row input { border-bottom-color:rgba(32,160,160,0.5); }
+    .op-status-row input::-webkit-inner-spin-button,
+    .op-status-row input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .op-status-sep { font-size:1.2rem; color:#6a3fa0; }
+    .op-status-hint { font-family:'Cinzel',serif; font-size:0.44rem; color:#6a3fa0; text-transform:uppercase; margin-top:3px; }
+
+    /* ── Combate ──────────────────────────────────────── */
+    .op-combat-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:8px; }
+    .op-combat-box {
+        background:#160e24; border:1px solid #4a2070;
+        border-radius:4px; padding:6px; text-align:center;
+        display:flex; flex-direction:column-reverse;
+    }
+    .op-combat-box input {
+        background:transparent; border:none;
+        border-bottom:1px solid rgba(106,63,160,0.4);
+        color:#d0c0e8; font-size:1.4rem; font-weight:bold;
+        text-align:center; outline:none; width:100%; -moz-appearance:textfield;
+    }
+    .op-combat-box input::-webkit-inner-spin-button,
+    .op-combat-box input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .op-combat-box label { font-family:'Cinzel',serif; font-size:0.5rem; color:#6a3fa0; text-transform:uppercase; }
+    .op-combat-formula { font-size:0.8rem; color:#9070c0; line-height:1.8; }
+    .op-combat-formula strong { color:#d0c0e8; font-size:1.1rem; }
+    .op-inline-input {
+        width:32px; background:transparent; border:none;
+        border-bottom:1px solid rgba(106,63,160,0.5);
+        color:#d0c0e8; font-size:0.85rem; text-align:center; outline:none;
+        -moz-appearance:textfield;
+    }
+    .op-inline-input::-webkit-inner-spin-button,
+    .op-inline-input::-webkit-outer-spin-button { -webkit-appearance:none; }
+
+    .op-resist-box {
+        background:#160e24; border:1px solid #4a2070; border-radius:4px; padding:8px;
+    }
+    .op-resist-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+    .op-resist-row:last-child { margin-bottom:0; }
+    .op-resist-row label { font-family:'Cinzel',serif; font-size:0.54rem; font-weight:600; text-transform:uppercase; color:#6a3fa0; white-space:nowrap; min-width:70px; }
+    .op-resist-row input { flex:1; background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.4); color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.9rem; outline:none; }
+
+    /* ── Ataques ──────────────────────────────────────── */
+    .op-attacks-box { background:#160e24; border:1px solid #4a2070; border-radius:4px; padding:8px; }
+    .op-attacks-header {
+        display:flex; gap:6px; align-items:center;
+        font-family:'Cinzel',serif; font-size:0.52rem; font-weight:600;
+        text-transform:uppercase; color:#6a3fa0;
+        border-bottom:1px solid #4a2070; padding-bottom:4px; margin-bottom:4px;
+    }
+    .op-attack-row {
+        display:flex; gap:6px; align-items:center;
+        border-bottom:1px solid rgba(74,32,112,0.3); padding:3px 0;
+    }
+    .op-attack-row input {
+        background:transparent; border:none; border-bottom:1px solid transparent;
+        color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.9rem; outline:none;
+    }
+    .op-attack-row input:focus { border-bottom-color:rgba(106,63,160,0.5); }
+
+    /* ── Perícias ─────────────────────────────────────── */
+    .op-col-skills {
+        background:#160e24; border:1px solid #4a2070;
+        border-radius:6px; padding:8px; max-height:600px; overflow-y:auto;
+    }
+    .op-skills-header {
+        display:flex; align-items:center; gap:4px;
+        font-family:'Cinzel',serif; font-size:0.48rem; font-weight:700;
+        text-transform:uppercase; color:#6a3fa0;
+        border-bottom:1px solid #4a2070; padding-bottom:4px; margin-bottom:3px;
+    }
+    .op-skill-row {
+        display:flex; align-items:center; gap:4px;
+        border-bottom:1px solid rgba(74,32,112,0.2); padding:2px 0;
+    }
+    .sk-name  { flex:2; font-size:0.8rem; color:#c0a8e0; }
+    .sk-attr  { width:28px; font-size:0.65rem; color:#6a3fa0; text-align:center; }
+    .sk-treino, .sk-outros {
+        width:38px; background:transparent; border:none;
+        border-bottom:1px solid rgba(106,63,160,0.3);
+        color:#d0c0e8; font-size:0.85rem; text-align:center; outline:none;
+        -moz-appearance:textfield;
+    }
+    .sk-treino::-webkit-inner-spin-button, .sk-treino::-webkit-outer-spin-button,
+    .sk-outros::-webkit-inner-spin-button, .sk-outros::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .sk-total { width:34px; font-weight:bold; font-size:0.9rem; text-align:center; color:#8060b0; }
+    .sk-total.sk-positive { color:#a060e0; }
+    .sk-trained-only { font-style:italic; }
+    .op-skills-hint { font-family:'Cinzel',serif; font-size:0.48rem; color:#4a2070; text-transform:uppercase; margin-top:4px; text-align:right; }
+
+    /* ── Títulos de seção ─────────────────────────────── */
+    .op-section-title {
+        font-family:'Cinzel',serif; font-size:0.65rem; font-weight:700;
+        text-transform:uppercase; color:#8060b0; letter-spacing:0.1em;
+        border-bottom:1px solid #4a2070; padding-bottom:4px;
+        display:block; margin-bottom:6px;
+    }
+
+    /* ── Botões add/del ───────────────────────────────── */
+    .op-add-btn {
+        font-family:'Cinzel',serif; font-size:0.6rem; font-weight:600;
+        letter-spacing:0.08em; text-transform:uppercase;
+        background:transparent; border:1px solid #4a2070;
+        border-radius:4px; color:#6a3fa0; padding:4px 12px;
+        cursor:pointer; transition:all 0.15s; margin-top:6px; display:block;
+    }
+    .op-add-btn:hover { background:#4a2070; color:#d0c0e8; }
+    .op-del-btn {
+        width:22px; height:22px; flex-shrink:0;
+        background:transparent; border:1px solid rgba(122,21,21,0.4);
+        border-radius:3px; color:#7a1515; font-size:0.65rem;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+        transition:all 0.15s;
+    }
+    .op-del-btn:hover { background:#7a1515; color:#fff; }
+
+    /* ── Habilidades & Rituais ────────────────────────── */
+    .op-hab-header {
+        display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:1rem;
+        padding-bottom:0.75rem; border-bottom:1px solid #4a2070;
+    }
+    .op-hab-table-header, .op-ritual-table-header {
+        display:flex; gap:6px; align-items:center;
+        font-family:'Cinzel',serif; font-size:0.5rem; font-weight:700;
+        text-transform:uppercase; color:#6a3fa0;
+        background:rgba(74,32,112,0.2); border-radius:3px;
+        padding:3px 6px; margin-bottom:3px;
+    }
+    .op-hab-row, .op-ritual-main {
+        display:flex; gap:6px; align-items:center;
+        border-bottom:1px solid rgba(74,32,112,0.2); padding:3px 0;
+    }
+    .op-hab-row input, .op-ritual-main input {
+        background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.2);
+        color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.88rem; outline:none;
+    }
+    .op-ritual-row { background:#160e24; border:1px solid rgba(74,32,112,0.3); border-radius:4px; margin-bottom:3px; overflow:hidden; }
+    .op-ritual-row.is-open { border-color:#6a3fa0; }
+    .op-ritual-body { padding:8px 10px; border-top:1px solid rgba(74,32,112,0.3); }
+    .op-ritual-desc-label { font-family:'Cinzel',serif; font-size:0.52rem; font-weight:600; text-transform:uppercase; color:#6a3fa0; display:block; margin-bottom:4px; }
+    .op-ritual-desc { width:100%; background:rgba(22,14,36,0.8); border:1px solid rgba(74,32,112,0.3); border-radius:3px; color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.9rem; line-height:1.6; outline:none; resize:vertical; min-height:80px; padding:5px 7px; }
+
+    /* ── Inventário ───────────────────────────────────── */
+    .op-inv-meta { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid #4a2070; }
+    .op-tier-box { background:#160e24; border:1px solid #4a2070; border-radius:4px; padding:8px; margin-bottom:1rem; }
+    .op-tier-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+    .op-tier-cell { text-align:center; }
+    .op-tier-label { font-family:'Cinzel',serif; font-size:0.6rem; font-weight:700; color:#8060b0; margin-bottom:3px; }
+    .op-tier-cell input { width:100%; background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.4); color:#d0c0e8; font-size:1.2rem; font-weight:bold; text-align:center; outline:none; -moz-appearance:textfield; }
+    .op-tier-cell input::-webkit-inner-spin-button, .op-tier-cell input::-webkit-outer-spin-button { -webkit-appearance:none; }
+    .op-inv-header { display:flex; gap:6px; font-family:'Cinzel',serif; font-size:0.5rem; font-weight:700; text-transform:uppercase; color:#6a3fa0; background:rgba(74,32,112,0.2); border-radius:3px; padding:3px 6px; margin-bottom:3px; }
+    .op-inv-row { display:flex; gap:6px; align-items:center; border-bottom:1px solid rgba(74,32,112,0.2); padding:3px 0; }
+    .op-inv-row input { background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.2); color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.9rem; outline:none; }
+
+    /* ── Descrição ────────────────────────────────────── */
+    .op-desc-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .op-desc-box { background:#160e24; border:1px solid #4a2070; border-radius:4px; padding:8px; }
+    .op-desc-box textarea { width:100%; background:transparent; border:none; color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.95rem; resize:vertical; outline:none; min-height:100px; line-height:1.6; }
+
+    /* ── Missões ──────────────────────────────────────── */
+    .op-missions-meta { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:1rem; max-width:300px; }
+    .op-mission-card { background:#160e24; border:1px solid rgba(74,32,112,0.4); border-radius:6px; margin-bottom:5px; overflow:hidden; }
+    .op-mission-card.is-open { border-color:#6a3fa0; }
+    .op-mission-top { display:flex; align-items:center; gap:8px; padding:7px 10px; }
+    .op-mission-num { font-family:'Cinzel',serif; font-size:0.75rem; font-weight:700; color:#6a3fa0; flex-shrink:0; }
+    .op-mission-title-input { flex:2; background:transparent; border:none; border-bottom:1.5px solid rgba(106,63,160,0.4); color:#d0c0e8; font-family:'Crimson Text',serif; font-size:1rem; font-weight:600; outline:none; padding:2px 4px; min-width:0; }
+    .op-mission-meta-input { flex:1.5; background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.3); color:#8060b0; font-family:'Crimson Text',serif; font-size:0.88rem; font-style:italic; outline:none; padding:2px 4px; min-width:0; }
+    .op-mission-body { padding:8px 10px; border-top:1px solid rgba(74,32,112,0.25); }
+    .op-mission-body label { font-family:'Cinzel',serif; font-size:0.52rem; font-weight:600; text-transform:uppercase; color:#6a3fa0; display:block; margin-bottom:4px; }
+    .op-mission-body textarea { width:100%; background:rgba(22,14,36,0.8); border:1px solid rgba(74,32,112,0.3); border-radius:3px; color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.9rem; line-height:1.6; outline:none; resize:vertical; min-height:80px; padding:5px 7px; }
+    .op-downtime-row { display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(74,32,112,0.2); padding:3px 0; }
+    .op-downtime-num { font-family:'Cinzel',serif; font-size:0.7rem; font-weight:700; color:#6a3fa0; flex-shrink:0; width:20px; }
+    .op-downtime-row input { background:transparent; border:none; border-bottom:1px solid rgba(106,63,160,0.2); color:#d0c0e8; font-family:'Crimson Text',serif; font-size:0.88rem; outline:none; }
+
+    /* Reutiliza o spell-expand-btn do DnD com cor de Ordem */
+    .op-sheet .spell-expand-btn { border-color:#4a2070; color:#6a3fa0; }
+    .op-sheet .spell-expand-btn:hover,
+    .op-sheet .op-ritual-row.is-open .spell-expand-btn,
+    .op-sheet .op-mission-card.is-open .spell-expand-btn { background:#4a2070; color:#d0c0e8; }
+</style>
+
+@code {
+    [Parameter] public CharacterSheet Sheet { get; set; } = new();
+
+    private string ActiveTab = "Principal";
+    private readonly string[] Tabs = { "Principal", "Habilidades & Rituais", "Inventário", "Descrição", "Missões" };
+
+    // ── Modelos ──────────────────────────────────────────────────
+    private class AttackEntry
+    {
+        public string Arma     { get; set; } = "";
+        public string Teste    { get; set; } = "";
+        public string Dano     { get; set; } = "";
+        public string Especial { get; set; } = "";
+    }
+
+    private class HabilityEntry
+    {
+        public string Nome       { get; set; } = "";
+        public string Custo      { get; set; } = "";
+        public string Pagina     { get; set; } = "";
+        public string Descritivo { get; set; } = "";
+    }
+
+    private class RitualEntry
+    {
+        public string Nome       { get; set; } = "";
+        public string Elemento   { get; set; } = "";
+        public string Execucao   { get; set; } = "";
+        public string Alcance    { get; set; } = "";
+        public string Area       { get; set; } = "";
+        public string Duracao    { get; set; } = "";
+        public string Resistencia{ get; set; } = "";
+        public string Efeito     { get; set; } = "";
+        public string Descricao  { get; set; } = "";
+        public bool   Expanded   { get; set; }
+    }
+
+    private class InvItemEntry
+    {
+        public string Nome      { get; set; } = "";
+        public string Categoria { get; set; } = "";
+        public string Espacos   { get; set; } = "";
+    }
+
+    private class MissionEntry
+    {
+        public string Titulo      { get; set; } = "";
+        public string Recompensas { get; set; } = "";
+        public string Acoes       { get; set; } = "";
+        public bool   Expanded    { get; set; }
+    }
+
+    private class DowntimeEntry
+    {
+        public string Acao      { get; set; } = "";
+        public string Descricao { get; set; } = "";
+    }
+
+    private List<AttackEntry>   Attacks         = new();
+    private List<HabilityEntry> Habilities      = new();
+    private List<RitualEntry>   Rituals         = new();
+    private List<InvItemEntry>  InvItems        = new();
+    private List<MissionEntry>  Missions        = new();
+    private List<DowntimeEntry> DowntimeActions = new();
+
+    // ── Atributos ────────────────────────────────────────────────
+    private record AttrDef(string Key, string Short, string Label);
+    private readonly AttrDef[] Attrs = {
+        new("agi", "AGI", "Agilidade"),
+        new("for", "FOR", "Força"),
+        new("int", "INT", "Intelecto"),
+        new("pre", "PRE", "Presença"),
+        new("vig", "VIG", "Vigor"),
+    };
+
+    // ── Perícias ─────────────────────────────────────────────────
+    private record SkillDef(string Key, string Label, string Attr, string AttrLabel, bool SomenteTreinada = false);
+    private readonly SkillDef[] Skills = {
+        new("acrobacia",     "Acrobacia",     "agi", "AGI"),
+        new("adestramento",  "Adestramento",  "pre", "PRE", true),
+        new("artes",         "Artes",         "pre", "PRE", true),
+        new("atletismo",     "Atletismo",     "for", "FOR"),
+        new("atualidades",   "Atualidades",   "int", "INT"),
+        new("ciencias",      "Ciências",      "int", "INT", true),
+        new("crime",         "Crime",         "agi", "AGI", true),
+        new("diplomacia",    "Diplomacia",    "pre", "PRE"),
+        new("enganacao",     "Enganação",     "pre", "PRE"),
+        new("fortitude",     "Fortitude",     "vig", "VIG"),
+        new("furtividade",   "Furtividade",   "agi", "AGI"),
+        new("iniciativa",    "Iniciativa",    "agi", "AGI"),
+        new("intimidacao",   "Intimidação",   "pre", "PRE"),
+        new("intuicao",      "Intuição",      "pre", "PRE"),
+        new("investigacao",  "Investigação",  "int", "INT"),
+        new("luta",          "Luta",          "for", "FOR"),
+        new("medicina",      "Medicina",      "int", "INT"),
+        new("ocultismo",     "Ocultismo",     "int", "INT", true),
+        new("percepcao",     "Percepção",     "pre", "PRE"),
+        new("pilotagem",     "Pilotagem",     "agi", "AGI", true),
+        new("pontaria",      "Pontaria",      "agi", "AGI"),
+        new("profissao",     "Profissão",     "int", "INT", true),
+        new("reflexos",      "Reflexos",      "agi", "AGI"),
+        new("religiao",      "Religião",      "pre", "PRE", true),
+        new("sobrevivencia", "Sobrevivência", "int", "INT"),
+        new("tatica",        "Tática",        "int", "INT", true),
+        new("tecnologia",    "Tecnologia",    "int", "INT", true),
+        new("vontade",       "Vontade",       "pre", "PRE"),
+    };
+
+    // ── Helpers ──────────────────────────────────────────────────
+    private string V(string k)  => Sheet.Attributes.TryGetValue(k, out var v) ? v?.ToString() ?? "" : "";
+    private int    IZero(string k) => int.TryParse(V(k), out var n) ? n : 0;
+    private void   S(string k, object? v) => Sheet.Attributes[k] = v ?? "";
+
+    private int    Defesa()   => 10 + IZero("agi") + IZero("defesa_equip") + IZero("defesa_outros");
+    private string FVal(string k) => IZero(k).ToString();
+    private string FVal(int n)    => n >= 0 ? $"+{n}" : $"{n}";
+
+    // ── Textareas ────────────────────────────────────────────────
+    private string AparenciaValue    { get => V("aparencia");    set => S("aparencia",    value); }
+    private string PersonalidadeValue{ get => V("personalidade");set => S("personalidade",value); }
+    private string HistoricoValue    { get => V("historico");    set => S("historico",    value); }
+    private string ObjetivoValue     { get => V("objetivo");     set => S("objetivo",     value); }
+    private string AnotacoesValue    { get => V("anotacoes");    set => S("anotacoes",    value); }
+}
